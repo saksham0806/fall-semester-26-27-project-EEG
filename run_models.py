@@ -1,9 +1,13 @@
 import os
+import sys
 import time
 import json
 import numpy as np
 import tensorflow as tf
 import gc
+
+# Add src/ folder to sys.path to enable importing proposed_model
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), 'src')))
 
 from sklearn.model_selection import GridSearchCV
 from sklearn.utils.class_weight import compute_class_weight
@@ -26,10 +30,11 @@ from proposed_model import (
     masked_binary_crossentropy
 )
 
-# Constants
-DATA_DIR = "datasets/combined_data"
-FEATURES_CACHE = "datasets/combined_data/extracted_features_tuned.npy"
-REPORT_PATH = "report.md"
+# Constants resolved relative to project root
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(PROJECT_ROOT, "datasets", "combined_data")
+FEATURES_CACHE = os.path.join(DATA_DIR, "extracted_features_tuned.npy")
+REPORT_PATH = os.path.join(PROJECT_ROOT, "report.md")
 EPOCHS = 25
 BATCH_SIZE = 128
 LEARNING_RATE = 5e-4  # Tuned learning rate for stable convergence

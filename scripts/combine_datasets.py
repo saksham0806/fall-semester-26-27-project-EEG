@@ -6,13 +6,15 @@ import pandas as pd
 import scipy.io
 from scipy.signal import resample
 
-# Paths
-BASE_DIR = "/run/media/Saksham/Saksham/Code/Projects/fall-semester-26-27-project-EEG/datasets"
+# Paths resolved dynamically relative to project root
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+BASE_DIR = os.path.join(PROJECT_ROOT, "datasets")
 MODMA_DIR = os.path.join(BASE_DIR, "MODMA/EEG_128channels_resting_lanzhou_2015")
 SAM40_DIR = os.path.join(BASE_DIR, "SAM40")
 COG_DIR = os.path.join(BASE_DIR, "Cognitive Load Assessment Through EEG A Dataset from Arithmetic and Stroop Tasks")
 AMIGOS_DIR = os.path.join(BASE_DIR, "AMIGOS DATASET")
-OUTPUT_DIR = "/run/media/Saksham/Saksham/Code/Projects/fall-semester-26-27-project-EEG/datasets/combined_data"
+OUTPUT_DIR = os.path.join(BASE_DIR, "combined_data")
 
 # Standard parameters
 TARGET_RATE = 128

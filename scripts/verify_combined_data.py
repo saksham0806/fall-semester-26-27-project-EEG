@@ -2,7 +2,10 @@ import os
 import json
 import numpy as np
 
-OUTPUT_DIR = "/run/media/Saksham/Saksham/Code/Projects/fall-semester-26-27-project-EEG/datasets/combined_data"
+# Paths resolved dynamically relative to project root
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
+OUTPUT_DIR = os.path.join(PROJECT_ROOT, "datasets", "combined_data")
 
 def verify():
     print("=== Combined EEG Dataset Verification ===")
@@ -50,16 +53,16 @@ def verify():
     
     # Normalization check
     print("\nVerifying Z-score normalization...")
-    # Compute mean and std for a sample segment and overall
+    # Compute mean and std for a sample segment globally (since global normalization is used to preserve spatial amplitude ratio across channels)
     sample_idx = 42
-    sample_means = np.mean(X[sample_idx], axis=1)
-    sample_stds = np.std(X[sample_idx], axis=1)
-    print(f"  Sample segment #{sample_idx} means per channel: {sample_means}")
-    print(f"  Sample segment #{sample_idx} stds per channel: {sample_stds}")
+    sample_mean_global = np.mean(X[sample_idx])
+    sample_std_global = np.std(X[sample_idx])
+    print(f"  Sample segment #{sample_idx} global mean: {sample_mean_global}")
+    print(f"  Sample segment #{sample_idx} global std: {sample_std_global}")
     
     # Verify they are very close to 0 and 1
-    assert np.allclose(sample_means, 0.0, atol=1e-5), "Z-score normalization mean check failed!"
-    assert np.allclose(sample_stds, 1.0, atol=1e-5), "Z-score normalization std check failed!"
+    assert np.allclose(sample_mean_global, 0.0, atol=1e-5), "Z-score normalization mean check failed!"
+    assert np.allclose(sample_std_global, 1.0, atol=1e-5), "Z-score normalization std check failed!"
     print("  [OK] Z-score normalization verified successfully.")
     
     # Label mapping sanity checks
