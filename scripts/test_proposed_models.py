@@ -1,4 +1,9 @@
 import os
+import sys
+
+# Add src/ folder to sys.path to enable importing proposed_model
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
+
 import numpy as np
 import tensorflow as tf
 
@@ -50,12 +55,12 @@ def run_tests():
     print(f"  PSD shape: {psd.shape} (Expected: (32, 30))")
     print(f"  DE shape: {de.shape} (Expected: (32, 30))")
     print(f"  FAA shape: {faa.shape} (Expected: (32, 3))")
-    print(f"  All concatenated features shape: {all_feats.shape} (Expected: (32, 63))")
+    print(f"  All concatenated features shape: {all_feats.shape} (Expected: (32, 81))")
     
     assert psd.shape == (32, 30)
     assert de.shape == (32, 30)
     assert faa.shape == (32, 3)
-    assert all_feats.shape == (32, 63)
+    assert all_feats.shape == (32, 81)
     print("  [OK] All feature extraction modules passed successfully.")
 
     # 3. Test Classical ML Pipelines
