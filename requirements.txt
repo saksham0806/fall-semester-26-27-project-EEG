@@ -11,3 +11,8 @@ h5py
 tqdm
 openpyxl
 xlrd
+torch 
+torchvision 
+torchaudio
+tensorflow
+plotly
