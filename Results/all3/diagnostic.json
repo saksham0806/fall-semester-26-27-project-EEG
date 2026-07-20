@@ -1,0 +1,61 @@
+{
+  "corpus_probe_accuracy": 0.9161426767221054,
+  "shortcut_baseline": 0.6267166836215666,
+  "SVM on 81 features": {
+    "accuracy": 0.593145981688708,
+    "balanced_accuracy": 0.5939115103797352,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.033570701932858604,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5637642919964819,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.7279166666666667,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.5764574408642206,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "Riemannian tangent space": {
+    "accuracy": 0.32553407934893186,
+    "balanced_accuracy": 0.30477277640960637,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.30118260427263477,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.28910667169242366,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.5025,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.3004283851741479,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "confusion_matrix_riemannian": [
+    [
+      2734,
+      2965,
+      933
+    ],
+    [
+      2688,
+      1677,
+      1132
+    ],
+    [
+      783,
+      2107,
+      709
+    ]
+  ]
+}

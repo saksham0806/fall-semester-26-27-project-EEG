@@ -8,7 +8,7 @@ from ..proposed_model.eeg_models import TSception
 
 def build_dsffn(Chans=6, Samples=512, sampling_rate=128,
                 deep_proj_dim=128, hc_proj_dim=64, shared_dim=128,
-                dropout_rate=0.4):
+                dropout_rate=0.4, nb_classes=None):
     """
     Dual-Stream Feature-Fusion Network.
 
@@ -71,6 +71,13 @@ def build_dsffn(Chans=6, Samples=512, sampling_rate=128,
     shared = Dropout(dropout_rate, name='shared_dropout')(shared)
 
     # --- Task Heads ---
+    # nb_classes set -> single softmax head for the all3 3-class task.
+    # Left as None -> the original dual-sigmoid multi-task heads, unchanged.
+    if nb_classes is not None:
+        head = Dense(32, activation='relu', name='cls_hidden')(shared)
+        out = Dense(nb_classes, activation='softmax', name='output')(head)
+        return Model(inputs=[raw_input, hc_input], outputs=out, name='DSFFN')
+
     dep_hidden = Dense(32, activation='relu', name='dep_hidden')(shared)
     dep_out = Dense(1, activation='sigmoid', name='depression')(dep_hidden)
 

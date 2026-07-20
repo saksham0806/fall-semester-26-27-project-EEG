@@ -1,0 +1,143 @@
+{
+  "shortcut_baseline": 0.6267166836215666,
+  "D1 1D CNN": {
+    "accuracy": 0.4424593082400814,
+    "balanced_accuracy": 0.4644673773058665,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.18425737538148523,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.6092473928885538,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.4116666666666667,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.20897746321475136,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "D2 LSTM": {
+    "accuracy": 0.5061673448626653,
+    "balanced_accuracy": 0.5144449507176289,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.12054933875890128,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5594923985425305,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.318122555410691,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "D3 CNN-LSTM": {
+    "accuracy": 0.5136063072227874,
+    "balanced_accuracy": 0.5274731863629999,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.11311037639877919,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5999497424299535,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.7429166666666667,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.2831067237846899,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "D4 EEGNet": {
+    "accuracy": 0.43044252288911494,
+    "balanced_accuracy": 0.4387138391400635,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.19627416073245169,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.6063575826108808,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.47875,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.1480722667163345,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "D5 TSception": {
+    "accuracy": 0.49027212614445576,
+    "balanced_accuracy": 0.5075784448417032,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.13644455747711087,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5847468274908908,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.5816666666666667,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.3093685975041907,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "D6 EEGTransformer": {
+    "accuracy": 0.5248601220752798,
+    "balanced_accuracy": 0.5433843693333963,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.10185656154628686,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5768312602085689,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.3471782454833302,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  },
+  "F3 DSFFN gated fusion": {
+    "accuracy": 0.5953713123092573,
+    "balanced_accuracy": 0.5980108317293139,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.0313453713123093,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.6071114461615781,
+        "majority_within": 0.547807513506722
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75
+      },
+      "CogLoad": {
+        "accuracy": 0.5088470851182716,
+        "majority_within": 0.6885826038368411
+      }
+    }
+  }
+}
