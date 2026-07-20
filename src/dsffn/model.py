@@ -4,7 +4,7 @@ from tensorflow.keras.layers import (
     Concatenate, Multiply, Lambda
 )
 from tensorflow.keras.models import Model
-from proposed_model.eeg_models import TSception
+from ..proposed_model.eeg_models import TSception
 
 def build_dsffn(Chans=6, Samples=512, sampling_rate=128,
                 deep_proj_dim=128, hc_proj_dim=64, shared_dim=128,

@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model
-from proposed_model.eeg_models import EEGNet, TSception, EEGTransformer
+from ..proposed_model.eeg_models import EEGNet, TSception, EEGTransformer
 
 def build_submodel_with_embedding(architecture, embed_dim=64, Chans=6, Samples=512):
     """

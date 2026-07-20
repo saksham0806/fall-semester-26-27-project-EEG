@@ -1,0 +1,72 @@
+{
+  "SVM": {
+    "auc_segment_oof": 0.7524753308130954,
+    "auc_per_fold_mean": 0.7373579661443348,
+    "auc_per_fold_std": 0.08185545063840291,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.771551724137931,
+      "balanced_acc": 0.6954022988505747
+    }
+  },
+  "Random Forest": {
+    "auc_segment_oof": 0.6189122997978541,
+    "auc_per_fold_mean": 0.6147442792776864,
+    "auc_per_fold_std": 0.045410609232216806,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.625,
+      "balanced_acc": 0.6192528735632183
+    }
+  },
+  "XGBoost": {
+    "auc_segment_oof": 0.543934349755666,
+    "auc_per_fold_mean": 0.5512672348724937,
+    "auc_per_fold_std": 0.08991037927397415,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.5545977011494253,
+      "balanced_acc": 0.5811781609195402
+    }
+  },
+  "1D CNN": {
+    "auc_segment_oof": 0.6923035132083072,
+    "auc_per_fold_mean": 0.7409716267331458,
+    "auc_per_fold_std": 0.12040372327111343,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.689655172413793,
+      "balanced_acc": 0.6954022988505747
+    }
+  },
+  "CNN-LSTM": {
+    "auc_segment_oof": 0.6571023487666043,
+    "auc_per_fold_mean": 0.6624738771616049,
+    "auc_per_fold_std": 0.07003452609481006,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.6666666666666667,
+      "balanced_acc": 0.6573275862068966
+    }
+  },
+  "EEGNet": {
+    "auc_segment_oof": 0.6238546767578149,
+    "auc_per_fold_mean": 0.6636508874824791,
+    "auc_per_fold_std": 0.16756312539944487,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.625,
+      "balanced_acc": 0.6573275862068966
+    }
+  },
+  "TSception": {
+    "auc_segment_oof": 0.7355789452217868,
+    "auc_per_fold_mean": 0.7634802187908585,
+    "auc_per_fold_std": 0.09473742110807931,
+    "subject_level": {
+      "n_subjects": 53,
+      "auc": 0.7385057471264368,
+      "balanced_acc": 0.6954022988505747
+    }
+  }
+}

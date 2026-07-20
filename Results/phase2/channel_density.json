@@ -1,0 +1,30 @@
+{
+  "6": {
+    "tangent_dims": 105,
+    "auc_segment": 0.6534532400692342,
+    "auc_subject": 0.6594827586206897,
+    "n_segments": 7959,
+    "n_subjects": 53
+  },
+  "16": {
+    "tangent_dims": 680,
+    "auc_segment": 0.672082841564043,
+    "auc_subject": 0.6824712643678161,
+    "n_segments": 7959,
+    "n_subjects": 53
+  },
+  "32": {
+    "tangent_dims": 2640,
+    "auc_segment": 0.6598895972632561,
+    "auc_subject": 0.6752873563218391,
+    "n_segments": 7959,
+    "n_subjects": 53
+  },
+  "64": {
+    "tangent_dims": 10400,
+    "auc_segment": 0.6573592052838327,
+    "auc_subject": 0.6580459770114943,
+    "n_segments": 7959,
+    "n_subjects": 53
+  }
+}

@@ -202,7 +202,8 @@ def load_cognitive_load():
         sub_id = candidates[0] if candidates else basename
         
         y_dep = -1
-        y_str = 1 # Tasks are active cognitive load (Stress/Workload)
+        # 'natural-*' files are the rest condition; the rest are active cognitive load
+        y_str = 0 if basename.lower().startswith('natural') else 1
         
         try:
             df = pd.read_csv(f, header=None, comment='#', on_bad_lines='skip')
@@ -252,8 +253,9 @@ def load_amigos():
                     
                 data = trial_sig.T[channels_idx, :]
                 
-                # Arousal is at index 1
-                arousal = trial_labels[0, 1]
+                # labels_selfassessment column order (per SelfAsessment.xlsx):
+                # 0: arousal, 1: valence, 2: dominance, 3: liking, ...
+                arousal = trial_labels[0, 0]
                 y_dep = -1
                 y_str = 1 if arousal >= 5.0 else 0
                 

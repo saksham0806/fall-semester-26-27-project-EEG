@@ -94,9 +94,9 @@ def verify():
     cog_str = y_stress[cog_mask]
     print(f"  Cognitive Load (2):")
     print(f"    y_depression unique values: {np.unique(cog_dep)} (expected [-1])")
-    print(f"    y_stress unique values: {np.unique(cog_str)} (expected [1])")
+    print(f"    y_stress unique values: {np.unique(cog_str)} (expected [0 1])")
     assert np.unique(cog_dep).tolist() == [-1], "Cognitive Load depression labels invalid!"
-    assert np.unique(cog_str).tolist() == [1], "Cognitive Load stress labels invalid!"
+    assert set(np.unique(cog_str)) == {0, 1}, "Cognitive Load stress labels invalid!"
     
     # AMIGOS (3)
     amigos_mask = (datasets == 3)
