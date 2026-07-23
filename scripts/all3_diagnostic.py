@@ -24,6 +24,7 @@ Run:  .venv/bin/python -u scripts/all3_diagnostic.py
 import json
 import os
 import sys
+import time
 
 import numpy as np
 
@@ -35,7 +36,8 @@ from pyriemann.tangentspace import TangentSpace
 from pyriemann.utils.base import invsqrtm
 from pyriemann.utils.mean import mean_riemann
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import balanced_accuracy_score, confusion_matrix
+from sklearn.metrics import (balanced_accuracy_score, confusion_matrix, f1_score,
+                             precision_recall_fscore_support)
 from sklearn.model_selection import GroupKFold, cross_val_score
 from sklearn.preprocessing import StandardScaler
 
@@ -88,25 +90,54 @@ def oof_predict(F, y, subjects):
     return pred
 
 
-def report(name, y, pred, corpus, shortcut, results):
+def slug(name):
+    """Filesystem-safe key for the saved prediction array."""
+    return "".join(ch if ch.isalnum() else "_" for ch in name).strip("_").lower()
+
+
+def report(name, y, pred, corpus, shortcut, results, elapsed_sec=None):
     acc = float((pred == y).mean())
     bal = float(balanced_accuracy_score(y, pred))
+    macro_f1 = float(f1_score(y, pred, average="macro"))
     margin = acc - shortcut
     print(f"\n  {name}")
-    print(f"    3-class accuracy      {acc:.4f}   balanced {bal:.4f}")
+    print(f"    3-class accuracy      {acc:.4f}   balanced {bal:.4f}   macro-F1 {macro_f1:.4f}")
     print(f"    vs corpus-ID shortcut {shortcut:.4f}   margin {margin:+.4f}"
           f"   {'<-- REAL SIGNAL' if margin > 0.02 else '<-- NO BETTER THAN DEVICE DETECTION'}")
+
+    # Per-class precision/recall/F1 — a 3-class accuracy can hide a class never predicted.
+    p, r, f, s = precision_recall_fscore_support(y, pred, labels=sorted(CLASS_NAMES),
+                                                 zero_division=0)
+    per_class = {CLASS_NAMES[i]: {"precision": float(p[i]), "recall": float(r[i]),
+                                  "f1": float(f[i]), "support": int(s[i])}
+                 for i in sorted(CLASS_NAMES)}
+    print("      " + "".join(f"{CLASS_NAMES[i]:>12s}" for i in sorted(CLASS_NAMES)))
+    for label, vals in (("precision", p), ("recall", r), ("f1", f)):
+        print(f"    {label:9s}" + "".join(f"{v:12.4f}" for v in vals))
 
     within = {}
     for c in np.unique(corpus):
         m = corpus == c
         a = float((pred[m] == y[m]).mean())
         base = float(np.bincount(y[m]).max() / m.sum())
-        within[CORPUS_NAMES[c]] = {"accuracy": a, "majority_within": base}
+        within[CORPUS_NAMES[c]] = {"accuracy": a, "majority_within": base,
+                                   "margin": a - base,
+                                   "macro_f1": float(f1_score(y[m], pred[m], average="macro"))}
         print(f"    within {CORPUS_NAMES[c]:8s} {a:.4f}  (majority {base:.4f}, margin {a - base:+.4f})")
 
-    results[name] = {"accuracy": acc, "balanced_accuracy": bal,
-                     "shortcut_baseline": shortcut, "margin": margin, "within_corpus": within}
+    results[name] = {"accuracy": acc, "balanced_accuracy": bal, "macro_f1": macro_f1,
+                     "shortcut_baseline": shortcut, "margin": margin,
+                     "per_class": per_class,
+                     "confusion_matrix": confusion_matrix(y, pred, labels=sorted(CLASS_NAMES)).tolist(),
+                     "within_corpus": within}
+    if elapsed_sec is not None:
+        results[name]["elapsed_sec"] = round(float(elapsed_sec), 1)
+        print(f"    elapsed {elapsed_sec:.1f}s")
+
+    # Persist out-of-fold predictions so a new metric never costs another training run.
+    preds_dir = os.path.join(OUT, "preds")
+    os.makedirs(preds_dir, exist_ok=True)
+    np.save(os.path.join(preds_dir, f"{slug(name)}.npy"), pred)
     return results
 
 
@@ -133,12 +164,23 @@ def main():
     # --- 2 & 3. 3-class performance and the within-corpus breakdown ----------------
     print("\n2/3. 3-CLASS PERFORMANCE (5-fold subject-grouped CV)")
     results = {"corpus_probe_accuracy": float(probe), "shortcut_baseline": shortcut}
-    results = report("SVM on 81 features", y, oof_predict(F, y, subjects), corpus, shortcut, results)
+    t0 = time.perf_counter()
+    results = report("SVM on 81 features", y, oof_predict(F, y, subjects), corpus, shortcut,
+                     results, elapsed_sec=time.perf_counter() - t0)
 
-    print("\n   building Riemannian features (per-corpus re-centering)...")
-    FR = riemannian_features(X, corpus)
+    # Same array all3_models.py caches; recomputing it costs ~13 min for nothing.
+    cache = os.path.join(DATA, "_cache_riemann_percorpus.npy")
+    if os.path.exists(cache):
+        print(f"\n   Riemannian features: reusing {os.path.basename(cache)}")
+        FR = np.load(cache)
+    else:
+        print("\n   building Riemannian features (per-corpus re-centering)...")
+        FR = riemannian_features(X, corpus)
+        np.save(cache, FR)
+    t0 = time.perf_counter()
     pred_r = oof_predict(FR, y, subjects)
-    results = report("Riemannian tangent space", y, pred_r, corpus, shortcut, results)
+    results = report("Riemannian tangent space", y, pred_r, corpus, shortcut, results,
+                     elapsed_sec=time.perf_counter() - t0)
 
     print("\n   confusion matrix, Riemannian (rows = true, cols = predicted)")
     cm = confusion_matrix(y, pred_r)

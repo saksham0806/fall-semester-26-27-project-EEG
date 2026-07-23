@@ -1,6 +1,8 @@
 import tensorflow as tf
 from tensorflow.keras import layers, models
 
+from .eeg_models import TransformerEncoderBlock
+
 def masked_binary_crossentropy(y_true, y_pred):
     """
     Computes binary cross-entropy, masking out elements where y_true is -1.
@@ -125,10 +127,16 @@ def build_dann_eeg_model(backbone_type='TSception', nb_classes=1, nb_domains=4, 
     Build a Domain Adversarial Neural Network (DANN) for EEG domain adaptation.
     Output 1: Main task classifier (e.g. stress/depression).
     Output 2: Domain classifier (dataset origin index) connected via Gradient Reversal Layer.
+
+    `alpha` is fixed at construction. Standard DANN ramps it 0 -> 1 during training; sweeping
+    fixed values answers the same question without the extra machinery.
+    # ponytail: fixed alpha, ramp 0->1 via tf.Variable + callback if the sweep shows alpha matters
     """
     input_layer = layers.Input(shape=(Chans, Samples, 1), name='input')
-    
+
     # Build shared feature extractor backbone
+    # NOTE: this TSception is an inline copy that has diverged from eeg_models.TSception.
+    # Left as-is deliberately — run_models.py depends on its current behaviour.
     if backbone_type == 'TSception':
         scales = [int(sampling_rate * 0.5), int(sampling_rate * 0.25), int(sampling_rate * 0.125)]
         t_layers = []
@@ -142,6 +150,23 @@ def build_dann_eeg_model(backbone_type='TSception', nb_classes=1, nb_domains=4, 
         x = layers.AveragePooling2D((1, 4))(x)
         x = layers.Dropout(0.5)(x)
         x = layers.Flatten()(x)
+        features = layers.Dense(128, activation='relu', name='shared_features')(x)
+    elif backbone_type == 'EEGTransformer':
+        # Same tokenisation as eeg_models.EEGTransformer, truncated before its head so the
+        # task/domain wiring below is shared with the other backbones.
+        patch_size, embed_dim, num_heads, ff_dim, num_layers = 16, 64, 4, 128, 2
+        x = layers.Reshape((Chans, Samples))(input_layer)
+        x = layers.Permute((2, 1))(x)
+        x = layers.Conv1D(embed_dim, patch_size, strides=patch_size,
+                          padding='valid', activation='relu')(x)
+        seq_len = Samples // patch_size
+        x = x + layers.Embedding(input_dim=seq_len, output_dim=embed_dim)(
+            tf.range(start=0, limit=seq_len, delta=1))
+        for _ in range(num_layers):
+            x = TransformerEncoderBlock(embed_dim=embed_dim, num_heads=num_heads,
+                                        ff_dim=ff_dim, rate=0.5)(x)
+        x = layers.GlobalAveragePooling1D()(x)
+        x = layers.Dropout(0.5)(x)
         features = layers.Dense(128, activation='relu', name='shared_features')(x)
     else:
         # Fallback to standard 1D CNN encoder
