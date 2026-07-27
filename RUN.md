@@ -30,7 +30,41 @@ interpretable alone — a classifier knowing only which amplifier recorded the s
 `Results/SUMMARY.md` contains **no** all3 row — `consolidate_results.py` reads only
 `Results/phase1/` and `phase2/`.
 
-## all3 feature extraction
+## all3 feature extraction — v2 (corrected preprocessing, 273 features)
+
+```bash
+.venv/bin/python -u scripts/extract_features_v2.py --smoke   # 600 segments, ~1 min
+.venv/bin/python -u scripts/extract_features_v2.py           # full, ~15 min, CPU only
+```
+
+Writes `features_v2/all3/`, one `.npy` per block plus `combined.npy`:
+
+| block | dim | content |
+|---|---|---|
+| `bandpower_rel` | 30 | relative band power, **denominator fixed to 0.5–45 Hz** |
+| `de` | 30 | differential entropy |
+| `faa` | 3 | frontal alpha asymmetry |
+| `amplitude` | 12 | STD, RMS |
+| `spectral_shape` | 24 | spectral entropy, 95% edge freq, 1/f slope + offset |
+| `hjorth` | 18 | activity, mobility, complexity |
+| `perm_entropy` | 6 | permutation entropy (order 3) |
+| `coherence` | 75 | 15 channel pairs × 5 bands |
+| `plv` | 75 | phase-locking value, 15 pairs × 5 bands |
+| **`combined`** | **273** | all of the above, in that order |
+| `riemannian_percorpus` / `_global` | 105 each | as v1 but zero-phase filtered |
+
+**Why v2 exists:** v1 divides band power by total power over 0–64 Hz while the bands span
+only 0.5–45 Hz. The unused gap holds ~88–98% of MODMA's power (50 Hz mains), 19–75% of
+CogLoad's, and ~34% of SAM40's — corpus-specific contamination in every relative-power
+feature. v2 notches 50 Hz and bandpasses 0.5–45 Hz zero-phase first.
+
+The script prints a **corpus probe** at the end — whether the recording device is still
+identifiable — against v1's 0.9161. That comparison is the point of the exercise.
+
+`src/proposed_model/features.py` is **not** modified; v1 stays reproducible. Self-test:
+`.venv/bin/python -m src.proposed_model.features_v2` (synthetic, seconds).
+
+## all3 feature extraction — v1 (81 features)
 
 ```bash
 .venv/bin/python -u scripts/extract_all3_features.py
