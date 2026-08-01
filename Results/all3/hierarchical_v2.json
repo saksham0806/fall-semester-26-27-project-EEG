@@ -1,0 +1,186 @@
+{
+  "shortcut_baseline": 0.6267166836215666,
+  "Hierarchical corpus-free / v2": {
+    "accuracy": 0.5979781281790437,
+    "balanced_accuracy": 0.5716803099199631,
+    "macro_f1": 0.5598760696170516,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.028738555442522906,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5358974358974359,
+        "recall": 0.5042219541616405,
+        "f1": 0.5195773772529522,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.7024063790402961,
+        "recall": 0.8973985810442059,
+        "f1": 0.7880191693290735,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.45760649087221095,
+        "recall": 0.3134203945540428,
+        "f1": 0.3720316622691293,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3344,
+        2076,
+        1212
+      ],
+      [
+        439,
+        4933,
+        125
+      ],
+      [
+        2457,
+        14,
+        1128
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5279557733383591,
+        "majority_within": 0.547807513506722,
+        "margin": -0.019851740168362886,
+        "macro_f1": 0.33394041686212966
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.6338238033153287,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.054758800521512385,
+        "macro_f1": 0.32950885353797904
+      }
+    },
+    "elapsed_sec": 67.1,
+    "router": "corpus-free",
+    "feature_set": "v2",
+    "guard_fired_folds": {
+      "MODMA": 1,
+      "SAM40": 5,
+      "CogLoad": 3
+    },
+    "router_accuracy": 0.9702823198245145
+  },
+  "Hierarchical oracle / v2": {
+    "accuracy": 0.6111393692777213,
+    "balanced_accuracy": 0.5846996111596129,
+    "macro_f1": 0.5695923014021701,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.01557731434384535,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5424202564945741,
+        "recall": 0.4974366706875754,
+        "f1": 0.5189554821456662,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.7111507337813743,
+        "recall": 0.9432417682372203,
+        "f1": 0.8109164842039412,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.4789808917197452,
+        "recall": 0.3134203945540428,
+        "f1": 0.37890493785690293,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3299,
+        2106,
+        1227
+      ],
+      [
+        312,
+        5185,
+        0
+      ],
+      [
+        2471,
+        0,
+        1128
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5353687649202161,
+        "majority_within": 0.547807513506722,
+        "margin": -0.012438748586505843,
+        "macro_f1": 0.5038844239665887
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.6613894579996275,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.02719314583721366,
+        "macro_f1": 0.47136393669912585
+      }
+    },
+    "elapsed_sec": 52.0,
+    "router": "oracle",
+    "feature_set": "v2",
+    "guard_fired_folds": {
+      "MODMA": 1,
+      "SAM40": 5,
+      "CogLoad": 3
+    }
+  },
+  "cogload_diagnostic": {
+    "v1 81 features": {
+      "accuracy": 0.5853976531942634,
+      "majority": 0.6885826038368411,
+      "margin": -0.10318495064257771,
+      "auc": 0.6288928175308313
+    },
+    "v2 273 features": {
+      "accuracy": 0.6556155708698082,
+      "majority": 0.6885826038368411,
+      "margin": -0.03296703296703296,
+      "auc": 0.7064028055852865
+    },
+    "v2 coherence only": {
+      "accuracy": 0.631588750232818,
+      "majority": 0.6885826038368411,
+      "margin": -0.05699385360402309,
+      "auc": 0.6313013396352661
+    },
+    "v2 plv only": {
+      "accuracy": 0.6770348295772025,
+      "majority": 0.6885826038368411,
+      "margin": -0.011547774259638599,
+      "auc": 0.682544232812587
+    },
+    "v2 spectral_shape only": {
+      "accuracy": 0.5867014341590613,
+      "majority": 0.6885826038368411,
+      "margin": -0.10188116967777983,
+      "auc": 0.6239968266006448
+    },
+    "v2 hjorth only": {
+      "accuracy": 0.5896815049357422,
+      "majority": 0.6885826038368411,
+      "margin": -0.09890109890109888,
+      "auc": 0.5971073791888677
+    }
+  }
+}

@@ -1,0 +1,547 @@
+{
+  "shortcut_baseline": 0.6267166836215666,
+  "DANN TSception alpha=0.0": {
+    "accuracy": 0.5336978636826043,
+    "balanced_accuracy": 0.538146616742968,
+    "macro_f1": 0.5371211011583983,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.09301881993896233,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5358888210140501,
+        "recall": 0.5291013268998793,
+        "f1": 0.5324734446130501,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.515360843483003,
+        "recall": 0.5157358559214117,
+        "f1": 0.5155482815057283,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.5572166349551508,
+        "recall": 0.5696026674076132,
+        "f1": 0.5633415773564165,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3509,
+        1902,
+        1221
+      ],
+      [
+        2254,
+        2835,
+        408
+      ],
+      [
+        785,
+        764,
+        2050
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5292122125895213,
+        "majority_within": 0.547807513506722,
+        "margin": -0.01859530091720063,
+        "macro_f1": 0.39618633193018704
+      },
+      "SAM40": {
+        "accuracy": 0.7379166666666667,
+        "majority_within": 0.75,
+        "margin": -0.012083333333333335,
+        "macro_f1": 0.4605024232003971
+      },
+      "CogLoad": {
+        "accuracy": 0.4490594151611101,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.23952318867573102,
+        "macro_f1": 0.3110381077135492
+      }
+    },
+    "elapsed_sec": 100.3,
+    "domain_accuracy": 0.5134155645981688,
+    "alpha": 0.0,
+    "backbone": "TSception"
+  },
+  "DANN TSception alpha=0.1": {
+    "accuracy": 0.5140513733468972,
+    "balanced_accuracy": 0.5212809963833546,
+    "macro_f1": 0.5079593057052386,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.11266531027466942,
+    "per_class": {
+      "healthy": {
+        "precision": 0.57305119029096,
+        "recall": 0.5553377563329313,
+        "f1": 0.5640554406922429,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.5237649262467806,
+        "recall": 0.4069492450427506,
+        "f1": 0.458026208026208,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.4304174950298211,
+        "recall": 0.6015559877743818,
+        "f1": 0.501796268397265,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3683,
+        1322,
+        1627
+      ],
+      [
+        2022,
+        2237,
+        1238
+      ],
+      [
+        722,
+        712,
+        2165
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.6277170498806383,
+        "majority_within": 0.547807513506722,
+        "margin": 0.07990953637391629,
+        "macro_f1": 0.45224263642520873
+      },
+      "SAM40": {
+        "accuracy": 0.6333333333333333,
+        "majority_within": 0.75,
+        "margin": -0.1166666666666667,
+        "macro_f1": 0.5044375366040456
+      },
+      "CogLoad": {
+        "accuracy": 0.2922331905382753,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.3963494132985658,
+        "macro_f1": 0.23609951441480223
+      }
+    },
+    "elapsed_sec": 82.1,
+    "domain_accuracy": 0.5211724313326551,
+    "alpha": 0.1,
+    "backbone": "TSception"
+  },
+  "DANN TSception alpha=0.3": {
+    "accuracy": 0.4738682604272635,
+    "balanced_accuracy": 0.4739217835186816,
+    "macro_f1": 0.46613510980532286,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.15284842319430314,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5212227414330218,
+        "recall": 0.40364897466827504,
+        "f1": 0.45496261046906866,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.4805252947321295,
+        "recall": 0.5857740585774058,
+        "f1": 0.5279554025250041,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.39989719866358264,
+        "recall": 0.432342317310364,
+        "f1": 0.41548731642189585,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        2677,
+        2284,
+        1671
+      ],
+      [
+        1613,
+        3220,
+        664
+      ],
+      [
+        846,
+        1197,
+        1556
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.4298278678225908,
+        "majority_within": 0.547807513506722,
+        "margin": -0.11797964568413116,
+        "macro_f1": 0.3377670950572416
+      },
+      "SAM40": {
+        "accuracy": 0.7491666666666666,
+        "majority_within": 0.75,
+        "margin": -0.0008333333333333526,
+        "macro_f1": 0.4282991900905193
+      },
+      "CogLoad": {
+        "accuracy": 0.4160923821940771,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.272490221642764,
+        "macro_f1": 0.3027280009471051
+      }
+    },
+    "elapsed_sec": 105.4,
+    "domain_accuracy": 0.48957273652085453,
+    "alpha": 0.3,
+    "backbone": "TSception"
+  },
+  "DANN TSception alpha=1.0": {
+    "accuracy": 0.45206002034587994,
+    "balanced_accuracy": 0.45313746299301716,
+    "macro_f1": 0.45121583873858634,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.17465666327568669,
+    "per_class": {
+      "healthy": {
+        "precision": 0.4700013482540111,
+        "recall": 0.5256332931242461,
+        "f1": 0.4962630792227205,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.38692390139335475,
+        "recall": 0.3283609241404402,
+        "f1": 0.35524503050580597,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.4989029072956665,
+        "recall": 0.5054181717143651,
+        "f1": 0.5021394064872325,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3486,
+        2008,
+        1138
+      ],
+      [
+        3003,
+        1805,
+        689
+      ],
+      [
+        928,
+        852,
+        1819
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5573564518155547,
+        "majority_within": 0.547807513506722,
+        "margin": 0.009548938308832744,
+        "macro_f1": 0.41788576747247547
+      },
+      "SAM40": {
+        "accuracy": 0.6654166666666667,
+        "majority_within": 0.75,
+        "margin": -0.08458333333333334,
+        "macro_f1": 0.4902060681666861
+      },
+      "CogLoad": {
+        "accuracy": 0.20059601415533618,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.48798658968150493,
+        "macro_f1": 0.14514355683643373
+      }
+    },
+    "elapsed_sec": 112.3,
+    "domain_accuracy": 0.5937817904374364,
+    "alpha": 1.0,
+    "backbone": "TSception"
+  },
+  "DANN EEGTransformer alpha=0.0": {
+    "accuracy": 0.5466683621566633,
+    "balanced_accuracy": 0.564438808332686,
+    "macro_f1": 0.5455642726630706,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.08004832146490337,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5829605530703538,
+        "recall": 0.4322979493365501,
+        "f1": 0.4964502164502165,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.5989249176348188,
+        "recall": 0.6283427323994907,
+        "f1": 0.61328125,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.4515169541939322,
+        "recall": 0.6326757432620173,
+        "f1": 0.5269613515389956,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        2867,
+        1827,
+        1938
+      ],
+      [
+        1215,
+        3454,
+        828
+      ],
+      [
+        836,
+        486,
+        2277
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5829878125392637,
+        "majority_within": 0.547807513506722,
+        "margin": 0.03518029903254172,
+        "macro_f1": 0.419943453380416
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.4019370460048426,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.2866455578319985,
+        "macro_f1": 0.28658227291225175
+      }
+    },
+    "elapsed_sec": 269.6,
+    "domain_accuracy": 0.4961851475076297,
+    "alpha": 0.0,
+    "backbone": "EEGTransformer"
+  },
+  "DANN EEGTransformer alpha=0.1": {
+    "accuracy": 0.5108723296032553,
+    "balanced_accuracy": 0.5291060496128265,
+    "macro_f1": 0.5129460682112892,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.11584435401831128,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5057787561915245,
+        "recall": 0.41571170084439085,
+        "f1": 0.45634362327236616,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.6005079117015042,
+        "recall": 0.5592141167909769,
+        "f1": 0.5791258477769404,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.4272974020938348,
+        "recall": 0.612392331203112,
+        "f1": 0.5033687335845609,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        2757,
+        1718,
+        2157
+      ],
+      [
+        1626,
+        3074,
+        797
+      ],
+      [
+        1068,
+        327,
+        2204
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5386355069732378,
+        "majority_within": 0.547807513506722,
+        "margin": -0.009172006533484156,
+        "macro_f1": 0.38799931206478827
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.3628236170609052,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.3257589867759359,
+        "macro_f1": 0.2751189792723519
+      }
+    },
+    "elapsed_sec": 178.8,
+    "domain_accuracy": 0.45568413021363174,
+    "alpha": 0.1,
+    "backbone": "EEGTransformer"
+  },
+  "DANN EEGTransformer alpha=0.3": {
+    "accuracy": 0.5447609359104781,
+    "balanced_accuracy": 0.5537908120074486,
+    "macro_f1": 0.5463341687998264,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.08195574771108849,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5312548472157592,
+        "recall": 0.5164354644149578,
+        "f1": 0.5237403471213395,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.6163613655287261,
+        "recall": 0.5386574495179188,
+        "f1": 0.5748956411998835,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.48737994192539646,
+        "recall": 0.6062795220894693,
+        "f1": 0.5403665180782565,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3425,
+        1592,
+        1615
+      ],
+      [
+        1856,
+        2961,
+        680
+      ],
+      [
+        1166,
+        251,
+        2182
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5828621686141475,
+        "majority_within": 0.547807513506722,
+        "margin": 0.03505465510742556,
+        "macro_f1": 0.4157021804474885
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.3965356677221084,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.2920469361147327,
+        "macro_f1": 0.296017263572348
+      }
+    },
+    "elapsed_sec": 202.2,
+    "domain_accuracy": 0.4763479145473042,
+    "alpha": 0.3,
+    "backbone": "EEGTransformer"
+  },
+  "DANN EEGTransformer alpha=1.0": {
+    "accuracy": 0.5808112919633774,
+    "balanced_accuracy": 0.5948749709819142,
+    "macro_f1": 0.5779307511526742,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": -0.04590539165818919,
+    "per_class": {
+      "healthy": {
+        "precision": 0.6224550306384661,
+        "recall": 0.4748190591073583,
+        "f1": 0.5387049867419382,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.6692098092643052,
+        "recall": 0.6701837365835911,
+        "f1": 0.6696964188329395,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.4457784663051898,
+        "recall": 0.639622117254793,
+        "f1": 0.525390847883145,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3149,
+        1482,
+        2001
+      ],
+      [
+        952,
+        3684,
+        861
+      ],
+      [
+        958,
+        339,
+        2302
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5816057293629853,
+        "majority_within": 0.547807513506722,
+        "margin": 0.0337982158562633,
+        "macro_f1": 0.41053313193600965
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.504004470106165,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.1845781337306761,
+        "macro_f1": 0.3711512864830933
+      }
+    },
+    "elapsed_sec": 191.5,
+    "domain_accuracy": 0.5071210579857579,
+    "alpha": 1.0,
+    "backbone": "EEGTransformer"
+  }
+}

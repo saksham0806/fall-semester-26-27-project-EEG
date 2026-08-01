@@ -1,16 +1,20 @@
 # Review Notes — all3 3-Class Track
 
-**Status: code and reporting infrastructure written. No new experimental results.**
-Everything below that carries a number is a *previously measured* result; everything new is
-written, syntax-checked, and unrun. That distinction is the most important thing to keep
-straight when presenting this.
+**Status: everything described here has now been RUN. 26 models, none beats the baseline.**
+
+This document was originally written when the new code was unrun; it has been updated with
+measured results. The headline is unchanged and now much better supported: the 3-class task
+is not solvable with these three corpora, and we have a purpose-built model plus a corrected
+feature pipeline to show it isn't for want of trying.
+
+**Read §3.6 first if short on time** — that is the new experimental result.
 
 ---
 
 ## 1. Lead with this
 
 > A classifier that knows **only which amplifier recorded the segment** — with zero EEG
-> understanding — scores **0.6267** on the 3-class task. The best of our 18 models scores
+> understanding — scores **0.6267** on the 3-class task. The best of our 26 models scores
 > **0.6256**.
 
 That single comparison is the finding. The 3-class problem as currently constituted is
@@ -72,31 +76,34 @@ Forcing one model to do both tasks makes it worse at each.
 
 ## 3. What was built this session
 
-### 3.1 A model that attacks the confound — `scripts/all3_dann.py` *(written, unrun)*
+### 3.1 A model that attacks the confound — `scripts/all3_dann.py` *(run — results in §3.6)*
 
 Domain-adversarial network: a gradient reversal layer sits between the shared backbone and a
 corpus classifier, pushing the backbone toward features that predict **class** but not
 **corpus**. Every prior model exploited the device signature; this one is built to destroy it.
 
 - Reuses `build_dann_eeg_model` in `src/proposed_model/multitask_dann_models.py`, which
-  already existed and had never been run on all3.
+  already existed but had never been run on all3 until now.
 - Added an `EEGTransformer` backbone branch to it (reusing the existing
   `TransformerEncoderBlock`), so ML / CNN / transformer are all covered under one protocol.
 - **8 configs**: 2 backbones × alpha ∈ {0.0, 0.1, 0.3, 1.0}.
 - **The alpha = 0.0 runs are controls** — adversary disabled. Without them, a change cannot be
   attributed to the adversary rather than to the backbone.
 
-**State the expected outcome before running it:** pooled accuracy should *fall* toward 0.33,
-because the model is deliberately destroying the signature that produces 0.6267. That is the
-measurement, not a failure. Success is judged only on CogLoad within-corpus > 0.6886.
+**The expected outcome was stated before running it:** pooled accuracy should *fall*, because
+the model is deliberately destroying the signature that produces 0.6267. Success was judged
+only on CogLoad within-corpus > 0.6886. Both predictions were registered in advance, and §3.6
+reports what actually happened.
 
 There is also a built-in check that the method worked: the domain head's own accuracy should
-fall from ~0.92 toward 0.33 as alpha rises. If it stays flat, the gradient reversal isn't
-training and the task numbers mean nothing.
+fall as alpha rises. The right reference is **each backbone's own α=0 control** (≈0.50), not
+the 0.9161 corpus probe — that figure is an SVM on 81 handcrafted features, whereas the domain
+head reads a 128-d learned representation. They are different quantities and were never
+comparable.
 
 ### 3.2 Reporting infrastructure — `scripts/all3_diagnostic.py`, `all3_tracks.py`
 
-A real gap: across 18 models, `Results/all3/` contained **no macro-F1, no per-class metrics,
+A real gap: across the first 18 models, `Results/all3/` contained **no macro-F1, no per-class metrics,
 and exactly one confusion matrix**. A 3-class accuracy can hide a class that is never
 predicted once.
 
@@ -110,11 +117,25 @@ think of later is a recompute from arrays rather than another training run.
 - **Track B** — pooled, plus a **signature delta**: the same model with the device signature
   preserved vs removed. That gap *is* the amplifier's contribution.
 
-### 3.3 Feature extraction — `scripts/extract_all3_features.py` *(written, unrun)*
+### 3.3 Feature extraction v2 — `scripts/extract_features_v2.py` *(run)*
 
-Materialises `features/all3/`: 81 handcrafted features, both Riemannian views (105-dim each),
-labels, corpus, subject IDs, and a JSON with feature names. Reuses the existing extractors and
-the cached Riemannian arrays rather than recomputing.
+`features_v2/all3/`, **15,728 × 273** in 168 s: corrected preprocessing (50 Hz notch +
+zero-phase 0.5–45 Hz bandpass) plus four families the repo never had — Hjorth, 1/f aperiodic
+slope, permutation entropy, and connectivity (coherence + PLV).
+
+It was built to test a specific hypothesis, and **the hypothesis was refuted.** The 45–64 Hz
+gap — excluded from every feature band but included in the relative-power denominator — holds
+84% of MODMA's total power (50 Hz mains), 35% of SAM40's, 23% of CogLoad's. Removing all of it
+changed corpus recoverability by **−0.010** (0.9161 → 0.9057 on the same 81 features). The
+amplifier signature lives *inside* the 0.5–45 Hz band, so no filter reaches it.
+
+Two by-products worth stating: going 81 → 273 features *raised* corpus recoverability by
+**+0.065** (more features make the shortcut easier, not harder), and a 600-segment pilot gave
+the **opposite sign** (−0.124) purely because 273 features are starved at that sample size —
+a caution about trusting probes measured on subsets.
+
+`scripts/extract_all3_features.py` (the v1 equivalent) remains unrun and is redundant: every
+script recomputes the v1 81 inline.
 
 ### 3.4 Two efficiency fixes
 
@@ -133,20 +154,50 @@ or xgboost should be installed before any of them is quoted as an XGBoost result
 
 ---
 
-## 4. What has NOT been run — say this plainly
+## 3.6 The DANN result — the new experiment
 
-Nothing in section 3 has been executed. No new results exist. Specifically:
+Gradient reversal between the shared backbone and a corpus classifier: 2 backbones ×
+α ∈ {0, 0.1, 0.3, 1.0}, where **α=0 disables the adversary and is the control**. All eight
+configs ran under the same 5-fold subject-grouped protocol as every other all3 model.
 
-- ❌ `all3_dann.py` — never run, no DANN numbers exist
-- ❌ `extract_all3_features.py` — `features/all3/` does not exist yet
-- ❌ `all3_tracks.py` — `TRACKS.md` not yet generated
-- ❌ The extended metrics — existing JSONs still carry only the old scalar keys; the scripts
-  must be re-run to backfill macro-F1 and per-class numbers
+**Primary criterion — CogLoad within-corpus > 0.6886: MISSED by all 8.** Best was
+EEGTransformer α=1.0 at **0.5040**. Best pooled accuracy 0.5808, still −0.046 under the
+0.6267 shortcut.
 
-Estimated ~60 minutes total, sequential, on the current machine. A GPU box is being
-provisioned, and a larger plan (foundation-model fine-tuning, a nested-CV hyperparameter
-sweep, and self-supervised pretraining on the 39,429 unused AMIGOS segments) is designed but
-not started.
+The domain-head accuracy is the diagnostic for *why* — it measures whether the adversary
+actually removed corpus information from the representation:
+
+| backbone | α=0.0 | α=0.1 | α=0.3 | α=1.0 |
+|---|---|---|---|---|
+| TSception | 0.5134 | 0.5212 | 0.4896 | **0.5938** |
+| EEGTransformer | 0.4962 | 0.4557 | 0.4763 | 0.5071 |
+
+TSception is **non-monotonic and worst at full strength**: corpus was *most* recoverable
+exactly where task accuracy was *lowest* (0.4521). That signature is training instability, not
+domain removal. EEGTransformer behaved better but traded ~0.04 of domain accuracy for ~0.04 of
+task accuracy — a 1:1 exchange that gains nothing.
+
+**Identified cause, if asked:** α is fixed at construction. Standard DANN anneals α from 0→1
+so the adversary joins gradually; here it fights the task objective from the first step. That
+is a known DANN failure mode and the first thing to change. So the honest claim is that *this
+configuration* fails, not that domain-adversarial training cannot work here.
+
+## 4. Status of every piece — all now run
+
+| item | status |
+|---|---|
+| `all3_diagnostic.py` | ✅ re-run, all metrics backfilled |
+| `all3_models.py` | ✅ 15 configs, none clear the shortcut |
+| `all3_deep.py` | ✅ 7 deep models, none clear the shortcut |
+| `all3_dann.py` | ✅ 8 configs, none clear CogLoad |
+| `all3_tracks.py` | ✅ `Results/all3/TRACKS.md` generated |
+| `extract_features_v2.py` | ✅ `features_v2/all3/`, 15,728 × 273 |
+| `extract_all3_features.py` (v1) | ❌ still unrun — redundant, v1 features are recomputed inline |
+
+**26 models total. None beats 0.6267. None beats CogLoad's 0.6886.**
+
+Still not started: the GPU-box plan — foundation-model fine-tuning (CBraMod/LaBraM/BIOT), a
+nested-CV hyperparameter sweep, and SSL on the 39,429 unused AMIGOS segments.
 
 ---
 
@@ -206,7 +257,7 @@ requires and which no current dataset provides.
 *We asked whether one model could separate healthy, stress, and depression. It can't — not
 because the models are weak, but because class identity is confounded with recording device:
 each of the three corpora used a different amplifier and none contains more than two of the
-three classes. A classifier using only device identity scores 0.6267; our best of 18 models
+three classes. A classifier using only device identity scores 0.6267; our best of 26 models
 scores 0.6256, and removing the device signature drops performance to chance. In two of three
 corpora, no model beats a constant predictor. The same data split into two binary tasks gives
 0.77 and 0.76 AUC. This session added a domain-adversarial model designed to attack that

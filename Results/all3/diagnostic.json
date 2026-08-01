@@ -1,45 +1,135 @@
 {
   "corpus_probe_accuracy": 0.9161426767221054,
   "shortcut_baseline": 0.6267166836215666,
-  "SVM on 81 features": {
+  "LogReg on 81 features": {
     "accuracy": 0.593145981688708,
     "balanced_accuracy": 0.5939115103797352,
+    "macro_f1": 0.5919430772302038,
     "shortcut_baseline": 0.6267166836215666,
     "margin": -0.033570701932858604,
+    "per_class": {
+      "healthy": {
+        "precision": 0.5482517482517483,
+        "recall": 0.5319662243667069,
+        "f1": 0.5399862248412031,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.6763440860215054,
+        "recall": 0.686556303438239,
+        "f1": 0.6814119346393428,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.545919741448963,
+        "recall": 0.5632120033342595,
+        "f1": 0.5544310722100656,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3528,
+        1741,
+        1363
+      ],
+      [
+        1400,
+        3774,
+        323
+      ],
+      [
+        1507,
+        65,
+        2027
+      ]
+    ],
     "within_corpus": {
       "MODMA": {
         "accuracy": 0.5637642919964819,
-        "majority_within": 0.547807513506722
+        "majority_within": 0.547807513506722,
+        "margin": 0.01595677848975996,
+        "macro_f1": 0.3927099792133489
       },
       "SAM40": {
         "accuracy": 0.7279166666666667,
-        "majority_within": 0.75
+        "majority_within": 0.75,
+        "margin": -0.022083333333333344,
+        "macro_f1": 0.5379007211897818
       },
       "CogLoad": {
         "accuracy": 0.5764574408642206,
-        "majority_within": 0.6885826038368411
+        "majority_within": 0.6885826038368411,
+        "margin": -0.11212516297262054,
+        "macro_f1": 0.3859368373931586
       }
-    }
+    },
+    "elapsed_sec": 41.9
   },
   "Riemannian tangent space": {
     "accuracy": 0.32553407934893186,
     "balanced_accuracy": 0.30477277640960637,
+    "macro_f1": 0.30744758248631915,
     "shortcut_baseline": 0.6267166836215666,
     "margin": -0.30118260427263477,
+    "per_class": {
+      "healthy": {
+        "precision": 0.44061240934730056,
+        "recall": 0.41224366706875754,
+        "f1": 0.4259562203006933,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.24848125648244185,
+        "recall": 0.30507549572494086,
+        "f1": 0.27388535031847133,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.2555875991348234,
+        "recall": 0.19699916643512086,
+        "f1": 0.22250117683979287,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        2734,
+        2965,
+        933
+      ],
+      [
+        2688,
+        1677,
+        1132
+      ],
+      [
+        783,
+        2107,
+        709
+      ]
+    ],
     "within_corpus": {
       "MODMA": {
         "accuracy": 0.28910667169242366,
-        "majority_within": 0.547807513506722
+        "majority_within": 0.547807513506722,
+        "margin": -0.2587008418142983,
+        "macro_f1": 0.2541853421194255
       },
       "SAM40": {
         "accuracy": 0.5025,
-        "majority_within": 0.75
+        "majority_within": 0.75,
+        "margin": -0.24750000000000005,
+        "macro_f1": 0.3261797283376814
       },
       "CogLoad": {
         "accuracy": 0.3004283851741479,
-        "majority_within": 0.6885826038368411
+        "majority_within": 0.6885826038368411,
+        "margin": -0.38815421866269323,
+        "macro_f1": 0.2282848620159262
       }
-    }
+    },
+    "elapsed_sec": 164.4
   },
   "confusion_matrix_riemannian": [
     [

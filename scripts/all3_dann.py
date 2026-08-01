@@ -78,12 +78,15 @@ def oof_dann(backbone, alpha, X, y, subjects, corpus):
                                      nb_domains=len(np.unique(corpus)), alpha=alpha)
         # The builder self-compiles with optimizer='adam' at Keras' default LR; recompile to
         # match the LR every other all3 script uses.
+        #
+        # Everything here is LIST-structured, not dict. build_dann_eeg_model returns
+        # outputs=[task, domain], and Keras 3 resolves y / sample_weight against that output
+        # structure — passing dicts makes it index dict[0] and raise KeyError: 0.
         model.compile(
             optimizer=tf.keras.optimizers.Adam(learning_rate=LR),
-            loss={"task": "sparse_categorical_crossentropy",
-                  "domain": "sparse_categorical_crossentropy"},
-            loss_weights={"task": 1.0, "domain": 1.0},
-            metrics={"task": "accuracy", "domain": "accuracy"})
+            loss=["sparse_categorical_crossentropy", "sparse_categorical_crossentropy"],
+            loss_weights=[1.0, 1.0],
+            metrics=[["accuracy"], ["accuracy"]])
 
         # Inner validation by subject, so early stopping never sees the held-out fold.
         inner = np.unique(subjects[tr])
@@ -98,11 +101,11 @@ def oof_dann(backbone, alpha, X, y, subjects, corpus):
         # class_weight is ambiguous on a two-output model, so balance the task head with an
         # explicit per-sample weight and leave the domain head unweighted — the adversary
         # should see the corpus distribution as it actually is.
-        model.fit(X[itr], {"task": y[itr], "domain": corpus[itr]},
-                  validation_data=(X[ival], {"task": y[ival], "domain": corpus[ival]}),
+        model.fit(X[itr], [y[itr], corpus[itr]],
+                  validation_data=(X[ival], [y[ival], corpus[ival]]),
                   epochs=EPOCHS, batch_size=BATCH, verbose=0,
-                  sample_weight={"task": np.array([cw[c] for c in y[itr]], dtype="float32"),
-                                 "domain": np.ones(len(itr), dtype="float32")},
+                  sample_weight=[np.array([cw[c] for c in y[itr]], dtype="float32"),
+                                 np.ones(len(itr), dtype="float32")],
                   callbacks=[tf.keras.callbacks.EarlyStopping(
                       monitor="val_loss", patience=5, restore_best_weights=True)])
 

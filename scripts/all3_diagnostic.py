@@ -165,7 +165,10 @@ def main():
     print("\n2/3. 3-CLASS PERFORMANCE (5-fold subject-grouped CV)")
     results = {"corpus_probe_accuracy": float(probe), "shortcut_baseline": shortcut}
     t0 = time.perf_counter()
-    results = report("SVM on 81 features", y, oof_predict(F, y, subjects), corpus, shortcut,
+    # Named for the estimator oof_predict actually uses (LogisticRegression, line 87).
+    # This row was previously labelled "SVM on 81 features", which it never was — it
+    # reproduces B4 LogReg from all3_models.py (0.593146), not B3b SVM (0.625636).
+    results = report("LogReg on 81 features", y, oof_predict(F, y, subjects), corpus, shortcut,
                      results, elapsed_sec=time.perf_counter() - t0)
 
     # Same array all3_models.py caches; recomputing it costs ~13 min for nothing.
