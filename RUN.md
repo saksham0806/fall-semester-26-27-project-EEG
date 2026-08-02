@@ -1,5 +1,31 @@
 # RUN.md
 
+## Deployment — classify a recording as healthy / stressed / depressed
+
+```bash
+.venv/bin/python -u scripts/train_deployable.py          # ~8 min, writes models/*.joblib
+.venv/bin/python predict.py recording.npy                # uses models/A_binary_pair.joblib
+.venv/bin/python predict.py recording.npy --model models/B_flat_3class.joblib --fs 256
+```
+
+Input: `.npy` of shape `(6, n_samples)`, channels **in order** `Fp1, Fp2, F7, F3, F4, F8`,
+any sampling rate (`--fs`, resampled to 128 Hz). Cut into 4 s windows at 50% overlap, each
+classified, votes aggregated. `--channels` reindexes a different order.
+
+| artifact | CV accuracy | note |
+|---|---|---|
+| `B_flat_3class.joblib` | **0.6256** | best available; one model, one call |
+| `C_hierarchical.joblib` | 0.6079 | context router (resting vs task) → specialist |
+| `A_binary_pair.joblib` | 0.3198 | **do not deploy** — see below |
+
+**These accuracies will not transfer to new hardware.** All models are validated
+subject-disjoint but **never device-disjoint**; corpus identity is ~97% recoverable from the
+features. Two independent measurements put real-world accuracy on an unseen amplifier near
+**chance (~0.32)**: removing the device signature drops 3-class accuracy to 0.3255, and
+approach A — whose specialists are necessarily applied to corpora they never trained on —
+scores 0.3198. Treat any output as a research signal, never a diagnosis.
+
+
 ## all3 experiments
 
 Run one at a time — `free -h` first, never two trainings concurrently. Use `-u`, or a

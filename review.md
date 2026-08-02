@@ -14,12 +14,21 @@ feature pipeline to show it isn't for want of trying.
 ## 1. Lead with this
 
 > A classifier that knows **only which amplifier recorded the segment** — with zero EEG
-> understanding — scores **0.6267** on the 3-class task. The best of our 26 models scores
-> **0.6256**.
+> understanding — scores **0.6267** on the 3-class task. Every one of our 26 *flat* models
+> scores at or below it; the best is **0.6256**.
+>
+> **A hierarchical two-stage model reaches 0.6820 (+0.055)** — the only architecture that
+> clears the bar.
 
-That single comparison is the finding. The 3-class problem as currently constituted is
-largely a device-identification problem, and reporting a raw 3-class accuracy without that
-baseline next to it would be misleading.
+That comparison is the finding. The 3-class problem as constituted is largely a
+device-identification problem, and reporting a raw 3-class accuracy without that baseline
+next to it would be misleading.
+
+**Why the hierarchical model works** (§3.7): a single flat boundary cannot suit all three
+corpora at once. CogLoad is 34% of the data and every flat model scores *below* its majority
+there, cancelling MODMA's genuine +0.11 gain. Routing by corpus first, then solving three
+binary problems, lets each corpus keep what it can learn — and a guard makes each specialist
+fall back to majority unless it beats guessing on inner CV, so 0.6267 becomes a floor.
 
 **The supporting evidence, all already measured:**
 
@@ -181,6 +190,37 @@ task accuracy — a 1:1 exchange that gains nothing.
 so the adversary joins gradually; here it fights the task objective from the first step. That
 is a known DANN failure mode and the first thing to change. So the honest claim is that *this
 configuration* fails, not that domain-adversarial training cannot work here.
+
+## 3.7 The hierarchical model — the result that beats the baseline
+
+| model | 3-class | vs 0.6267 |
+|---|---|---|
+| best flat model (SVM on 81 features) | 0.6256 | −0.001 |
+| hierarchical, v1 router | 0.6486 | +0.022 |
+| **hierarchical, v2 router + v1 specialists** | **0.6820** | **+0.055** |
+| hierarchical, oracle router | 0.6963 | +0.070 *(upper bound, not a result)* |
+
+**Report 0.6820.** The oracle row reads the true corpus label at inference and exists only to
+bound the routing loss. Be upfront that stage 1 consumes corpus identity — so does the 0.6267
+baseline it is measured against, but say it before you are asked.
+
+Four measured findings, each of which changed the design:
+
+1. **Router and specialists want opposite feature sets.** v2's 273 features route at 0.9703
+   (v1: 0.9161) but *collapse* the MODMA specialist to 0.5280 — below its own 0.5478 majority,
+   because 273 dimensions against 53 subjects overfits. Using v2 for stage 1 and v1 for stage 2
+   was worth **+0.033**, the single biggest improvement.
+2. **The guard carries the safety.** MODMA's specialist wins in 5/5 folds (+0.128 over its
+   majority); SAM40 and CogLoad never beat guessing and fall back. Because that decision is made
+   on inner CV over training folds only, 0.6267 is a floor by construction rather than a hope.
+3. **Hyperparameter tuning was worthless** — +0.0002 from a nested-CV grid over C and gamma.
+   The repo's long-standing default was already correct.
+4. **Letting the model pick its own feature view made things worse** (−0.025). Inner CV over
+   ~40 subjects cannot reliably choose between v1 and PLV, so the selection thrashed per fold.
+
+Point 4 is the recurring lesson of this project: **108 subjects cannot support extra degrees of
+freedom.** The same effect appeared when 273 features raised corpus recoverability +0.065 and
+when they broke the MODMA specialist. Adding capacity here reliably costs accuracy.
 
 ## 4. Status of every piece — all now run
 
