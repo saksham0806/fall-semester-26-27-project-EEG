@@ -36,7 +36,7 @@ sys.path.insert(0, os.path.join(PROJECT_ROOT, "src"))
 
 import joblib
 from sklearn.calibration import CalibratedClassifierCV
-from sklearn.model_selection import GroupKFold
+from sklearn.model_selection import GroupKFold, StratifiedKFold
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
@@ -52,11 +52,18 @@ N_SPLITS = 5
 
 
 def svm_proba():
-    """SVC + probability calibration. SVC(probability=True) is deprecated in sklearn 1.9."""
+    """
+    SVC + probability calibration. SVC(probability=True) is deprecated in sklearn 1.9.
+
+    The internal CV must be SHUFFLED: the default cv=3 is a non-shuffled KFold and X.npy is
+    ordered by corpus, so the folds land on three different amplifiers and the calibrator
+    learns an inverted mapping (measured: AUC 0.4410 vs 0.6527 shuffled).
+    """
     return make_pipeline(
         StandardScaler(),
         CalibratedClassifierCV(SVC(C=1.0, kernel="rbf", class_weight="balanced"),
-                               ensemble=False, cv=3))
+                               ensemble=False,
+                               cv=StratifiedKFold(3, shuffle=True, random_state=42)))
 
 
 def load():

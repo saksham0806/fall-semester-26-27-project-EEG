@@ -1,8 +1,19 @@
 """
 Classify EEG as healthy / stressed / depressed.
 
-    .venv/bin/python predict.py recording.npy
+    .venv/bin/python predict.py recording.npy --protocol screen    # healthy vs ill
+    .venv/bin/python predict.py recording.npy --protocol resting   # healthy vs depressed
+    .venv/bin/python predict.py recording.npy --protocol task      # healthy vs stressed
     .venv/bin/python predict.py recording.npy --model models/B_flat_3class.joblib --fs 256
+
+PICK THE PROTOCOL, NOT THE CLASS. Stress and depression cannot be told apart from this EEG —
+in the training data `depression` is a boolean identity with `corpus == MODMA`, so any model
+claiming to separate them is detecting the amplifier. What distinguishes them in practice is
+what you were doing during the recording: a resting-state assessment screens for depression, a
+cognitive-load protocol measures stress. `--protocol` states which you ran.
+
+Use `--protocol screen` when you do not want to assume either, and `--model` for the
+experimental 3-class artifacts.
 
 INPUT. A numpy array of shape (n_channels, n_samples) — one continuous recording — in
 CHANNEL ORDER Fp1, Fp2, F7, F3, F4, F8. Any sampling rate; it is resampled to 128 Hz. The
@@ -113,21 +124,36 @@ def predict_proba(art, F):
     raise SystemExit(f"unknown approach '{approach}' in artifact")
 
 
+PROTOCOLS = {"screen": "screen_healthy_vs_ill",
+             "resting": "resting_healthy_vs_depressed",
+             "task": "task_healthy_vs_stressed"}
+
+
+def run_binary(art, F):
+    """Screening artifact: per-window P(positive) and the tuned operating point."""
+    return art["model"].predict_proba(F)[:, 1], float(art["threshold"])
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("eeg", help=".npy file of shape (n_channels, n_samples)")
-    ap.add_argument("--model", default="models/A_binary_pair.joblib")
+    ap.add_argument("--protocol", choices=sorted(PROTOCOLS),
+                    help="which recording protocol was used (preferred interface)")
+    ap.add_argument("--model", help="path to a .joblib artifact (overrides --protocol)")
     ap.add_argument("--fs", type=float, default=128.0, help="sampling rate of the input")
     ap.add_argument("--channels", default=",".join(CANONICAL),
                     help="channel order in the input file")
     ap.add_argument("--per-window", action="store_true", help="print every window's verdict")
     args = ap.parse_args()
 
-    model_path = args.model if os.path.isabs(args.model) \
-        else os.path.join(PROJECT_ROOT, args.model)
+    if not args.model and not args.protocol:
+        args.protocol = "screen"
+    rel = args.model or f"models/{PROTOCOLS[args.protocol]}.joblib"
+    model_path = rel if os.path.isabs(rel) else os.path.join(PROJECT_ROOT, rel)
     if not os.path.exists(model_path):
-        raise SystemExit(f"no model at {model_path} — run scripts/train_deployable.py first")
+        raise SystemExit(f"no model at {model_path} — run scripts/train_screening.py "
+                         "(or scripts/train_deployable.py for the 3-class artifacts) first")
 
     raw = np.load(args.eeg)
     channels = [c.strip() for c in args.channels.split(",")]
@@ -136,26 +162,46 @@ def main():
     art = joblib.load(model_path)
     X = preprocess(raw, args.fs, channels)
     F = extract_all_features(X).astype(np.float32)
-    proba = predict_proba(art, F)
+    binary = "task" in art                       # screening artifacts carry a 'task' key
 
-    per_window = proba.argmax(axis=1)
-    mean_proba = proba.mean(axis=0)
-    verdict = int(mean_proba.argmax())
-
-    print(f"\nmodel      {os.path.relpath(model_path, PROJECT_ROOT)} "
-          f"({art['approach']}, CV accuracy {art['cv']['accuracy']:.4f})")
+    print(f"\nmodel      {os.path.relpath(model_path, PROJECT_ROOT)}")
+    print(f"           {art['description'] if binary else art['approach']}   "
+          f"CV accuracy {art['cv']['accuracy']:.4f}")
     print(f"input      {raw.shape[0]} ch x {raw.shape[1]} samples @ {args.fs:g} Hz "
           f"-> {len(X)} windows of 4 s")
-    print(f"\nPREDICTION  {CLASSES[verdict].upper()}\n")
-    print(f"  {'class':12s}{'mean prob':>11s}{'windows':>9s}")
-    for k in sorted(CLASSES):
-        n = int((per_window == k).sum())
-        print(f"  {CLASSES[k]:12s}{mean_proba[k]:11.3f}{n:6d} ({100*n/len(X):.0f}%)")
+
+    if binary:
+        labels = {int(k): v for k, v in art["classes"].items()}
+        p, thr = run_binary(art, F)
+        per_window = (p >= thr).astype(int)
+        mean_p = float(p.mean())
+        verdict = int(mean_p >= thr)
+        print(f"\nPREDICTION  {labels[verdict].upper()}\n")
+        print(f"  mean P({labels[1]}) {mean_p:.3f}   decision threshold {thr:.3f}")
+        print(f"  {'class':12s}{'windows':>9s}")
+        for k in sorted(labels):
+            n = int((per_window == k).sum())
+            print(f"  {labels[k]:12s}{n:6d} ({100 * n / len(X):.0f}%)")
+        cv = art["cv"]
+        print(f"\n  model quality: accuracy {cv['accuracy']:.4f} vs majority "
+              f"{cv['majority_baseline']:.4f} ({cv['margin']:+.4f}), AUC {cv['auc']:.4f}, "
+              f"sens {cv['sensitivity']:.2f} / spec {cv['specificity']:.2f}")
+    else:
+        proba = predict_proba(art, F)
+        per_window = proba.argmax(axis=1)
+        mean_proba = proba.mean(axis=0)
+        verdict = int(mean_proba.argmax())
+        labels = CLASSES
+        print(f"\nPREDICTION  {CLASSES[verdict].upper()}\n")
+        print(f"  {'class':12s}{'mean prob':>11s}{'windows':>9s}")
+        for k in sorted(CLASSES):
+            n = int((per_window == k).sum())
+            print(f"  {CLASSES[k]:12s}{mean_proba[k]:11.3f}{n:6d} ({100 * n / len(X):.0f}%)")
 
     if args.per_window:
         print("\n  window  verdict")
         for i, k in enumerate(per_window):
-            print(f"  {i:6d}  {CLASSES[k]}")
+            print(f"  {i:6d}  {labels[int(k)]}")
 
     agreement = float((per_window == verdict).mean())
     print(f"\n  window agreement {agreement:.0%}"

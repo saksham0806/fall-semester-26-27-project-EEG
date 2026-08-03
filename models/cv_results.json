@@ -3,32 +3,32 @@
   "n_segments": 15728,
   "n_subjects": 108,
   "A_binary_pair": {
-    "accuracy": 0.3198118006103764,
-    "balanced_accuracy": 0.3136369090068565,
-    "macro_f1": 0.25410803490382144,
+    "accuracy": 0.3995422177009156,
+    "balanced_accuracy": 0.4104908835579209,
+    "macro_f1": 0.3903631253571323,
     "confusion_matrix": [
       [
-        599,
-        5312,
-        721
+        1145,
+        4868,
+        619
       ],
       [
-        834,
-        3967,
-        696
+        1520,
+        3847,
+        130
       ],
       [
-        208,
-        2927,
-        464
+        285,
+        2022,
+        1292
       ]
     ],
-    "elapsed_sec": 17.5
+    "elapsed_sec": 17.8
   },
   "B_flat_3class": {
     "accuracy": 0.6256358087487284,
     "balanced_accuracy": 0.62419177192105,
-    "macro_f1": 0.6295092283350178,
+    "macro_f1": 0.629330717380239,
     "confusion_matrix": [
       [
         4123,
@@ -41,12 +41,12 @@
         174
       ],
       [
-        1363,
-        38,
+        1337,
+        64,
         2198
       ]
     ],
-    "elapsed_sec": 27.1
+    "elapsed_sec": 34.0
   },
   "C_hierarchical": {
     "accuracy": 0.6078967446592065,
@@ -70,6 +70,6 @@
       ]
     ],
     "router_accuracy": 0.914801176375151,
-    "elapsed_sec": 8.1
+    "elapsed_sec": 7.9
   }
 }
