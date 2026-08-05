@@ -56,6 +56,42 @@ interpretable alone — a classifier knowing only which amplifier recorded the s
 `Results/SUMMARY.md` contains **no** all3 row — `consolidate_results.py` reads only
 `Results/phase1/` and `phase2/`.
 
+## Raw-EEG deep learning, no feature extraction (`DL_Without_Features/`)
+
+braindecode architectures consuming the `(6, 512)` windows directly, plus a per-corpus-teacher
+distillation into one **corpus-blind** 3-class student. Pure torch — does not import `src/`.
+
+```bash
+# self-checks, seconds
+.venv/bin/python -m DL_Without_Features.data           # data invariants
+.venv/bin/python -m DL_Without_Features.core           # 9 asserts incl. the KD mask
+
+# harness proof: 18 subjects, 2 folds, 2 epochs -> Results/DL_Without_Features/_smoke/
+.venv/bin/python -u DL_Without_Features/benchmark.py --smoke     # ~1.5 min, CPU
+.venv/bin/python -u DL_Without_Features/distill.py  --smoke      # ~4 min, CPU
+
+# real runs — GPU box; local torch is 2.13.0+cpu, no CUDA
+.venv/bin/python -u DL_Without_Features/benchmark.py  > bench.log 2>&1   # 8 archs x 2 norms
+.venv/bin/python -u DL_Without_Features/benchmark.py --all              # +9 architectures
+.venv/bin/python -u DL_Without_Features/distill.py    > distill.log 2>&1
+```
+
+Input `datasets/all3/{X,y,subjects,corpus}.npy`, `X` is `(15728, 6, 512)`. Output
+`Results/DL_Without_Features/{benchmark,distill}.json` plus out-of-fold `preds/` and `emb/`.
+`benchmark.py` saves after **every model**, so a killed session keeps its finished rows.
+`distill.py --backbone auto` reads `benchmark.json`; run the benchmark first or pass
+`--backbone <Arch>`.
+
+**Read accuracy and corpus probe together.** Every row carries a 3-class accuracy against the
+0.6267 corpus-ID shortcut *and* a corpus probe on the model's own penultimate embedding
+(floor 0.4217). Beating 0.6267 with a probe near 0.97 is the device shortcut in a new costume,
+not a result. Anchor: braindecode `EEGNet [segment]` should land near **0.4306**, matching the
+Keras EEGNet on identical folds; above ~0.85 means the split broke.
+
+On a GPU box install torch **and torchaudio from the same CUDA index** — braindecode
+hard-imports torchaudio and a mismatched pair fails at import. See
+`DL_Without_Features/README.md` and `dl_plan.md`.
+
 ## all3 feature extraction — v2 (corrected preprocessing, 273 features)
 
 ```bash

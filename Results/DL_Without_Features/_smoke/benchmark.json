@@ -1,0 +1,296 @@
+{
+  "shortcut_baseline": 0.7021276595744681,
+  "n_segments": 1128,
+  "n_subjects": 18,
+  "epochs": 2,
+  "folds": 2,
+  "device": "cpu",
+  "ShallowFBCSPNet [segment]": {
+    "accuracy": 0.37854609929078015,
+    "balanced_accuracy": 0.30414736661519987,
+    "macro_f1": 0.206367472190257,
+    "shortcut_baseline": 0.7021276595744681,
+    "margin": -0.32358156028368795,
+    "per_class": {
+      "healthy": {
+        "precision": 0.3857280617164899,
+        "recall": 0.8620689655172413,
+        "f1": 0.5329780146568954,
+        "support": 464
+      },
+      "stress": {
+        "precision": 0.2967032967032967,
+        "recall": 0.05037313432835821,
+        "f1": 0.0861244019138756,
+        "support": 536
+      },
+      "depression": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 128
+      }
+    },
+    "confusion_matrix": [
+      [
+        400,
+        64,
+        0
+      ],
+      [
+        509,
+        27,
+        0
+      ],
+      [
+        128,
+        0,
+        0
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5,
+        "majority_within": 0.6666666666666666,
+        "margin": -0.16666666666666663,
+        "macro_f1": 0.2222222222222222
+      },
+      "SAM40": {
+        "accuracy": 0.25,
+        "majority_within": 0.75,
+        "margin": -0.5,
+        "macro_f1": 0.2
+      },
+      "CogLoad": {
+        "accuracy": 0.3776041666666667,
+        "majority_within": 0.6927083333333334,
+        "margin": -0.3151041666666667,
+        "macro_f1": 0.34057122328004313
+      }
+    },
+    "corpus_probe": 0.6600470430107527,
+    "corpus_probe_floor": 0.3404255319148936,
+    "embedding_dim": 1120,
+    "verdict": "no better than device detection",
+    "architecture": "ShallowFBCSPNet",
+    "norm": "segment",
+    "embedding": "penultimate",
+    "elapsed_sec": 2.6
+  },
+  "Deep4Net [segment]": {
+    "accuracy": 0.3882978723404255,
+    "balanced_accuracy": 0.3146551724137931,
+    "macro_f1": 0.19918144611186903,
+    "shortcut_baseline": 0.7021276595744681,
+    "margin": -0.3138297872340426,
+    "per_class": {
+      "healthy": {
+        "precision": 0.437125748502994,
+        "recall": 0.9439655172413793,
+        "f1": 0.597544338335607,
+        "support": 464
+      },
+      "stress": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 536
+      },
+      "depression": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 128
+      }
+    },
+    "confusion_matrix": [
+      [
+        438,
+        0,
+        26
+      ],
+      [
+        436,
+        0,
+        100
+      ],
+      [
+        128,
+        0,
+        0
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.6666666666666666,
+        "majority_within": 0.6666666666666666,
+        "margin": 0.0,
+        "macro_f1": 0.4
+      },
+      "SAM40": {
+        "accuracy": 0.25,
+        "majority_within": 0.75,
+        "margin": -0.5,
+        "macro_f1": 0.2
+      },
+      "CogLoad": {
+        "accuracy": 0.23958333333333334,
+        "majority_within": 0.6927083333333334,
+        "margin": -0.453125,
+        "macro_f1": 0.1631205673758865
+      }
+    },
+    "corpus_probe": 0.5888104838709678,
+    "corpus_probe_floor": 0.3404255319148936,
+    "embedding_dim": 200,
+    "verdict": "no better than device detection",
+    "architecture": "Deep4Net",
+    "norm": "segment",
+    "embedding": "penultimate",
+    "elapsed_sec": 1.7
+  },
+  "ShallowFBCSPNet [subject]": {
+    "accuracy": 0.47074468085106386,
+    "balanced_accuracy": 0.330609881626351,
+    "macro_f1": 0.2194536757174913,
+    "shortcut_baseline": 0.7021276595744681,
+    "margin": -0.23138297872340424,
+    "per_class": {
+      "healthy": {
+        "precision": 0.18181818181818182,
+        "recall": 0.008620689655172414,
+        "f1": 0.01646090534979424,
+        "support": 464
+      },
+      "stress": {
+        "precision": 0.47649186256781195,
+        "recall": 0.9832089552238806,
+        "f1": 0.6419001218026796,
+        "support": 536
+      },
+      "depression": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 128
+      }
+    },
+    "confusion_matrix": [
+      [
+        4,
+        460,
+        0
+      ],
+      [
+        9,
+        527,
+        0
+      ],
+      [
+        9,
+        119,
+        0
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.010416666666666666,
+        "majority_within": 0.6666666666666666,
+        "margin": -0.65625,
+        "macro_f1": 0.009913258983890954
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.6692708333333334,
+        "majority_within": 0.6927083333333334,
+        "margin": -0.0234375,
+        "macro_f1": 0.40093603744149764
+      }
+    },
+    "corpus_probe": 0.8235551075268817,
+    "corpus_probe_floor": 0.3404255319148936,
+    "embedding_dim": 1120,
+    "verdict": "no better than device detection",
+    "architecture": "ShallowFBCSPNet",
+    "norm": "subject",
+    "embedding": "penultimate",
+    "elapsed_sec": 1.5
+  },
+  "Deep4Net [subject]": {
+    "accuracy": 0.30407801418439717,
+    "balanced_accuracy": 0.4102574412420655,
+    "macro_f1": 0.30757017922098023,
+    "shortcut_baseline": 0.7021276595744681,
+    "margin": -0.3980496453900709,
+    "per_class": {
+      "healthy": {
+        "precision": 0.4661016949152542,
+        "recall": 0.23706896551724138,
+        "f1": 0.3142857142857143,
+        "support": 464
+      },
+      "stress": {
+        "precision": 0.7164948453608248,
+        "recall": 0.2593283582089552,
+        "f1": 0.38082191780821917,
+        "support": 536
+      },
+      "depression": {
+        "precision": 0.1346704871060172,
+        "recall": 0.734375,
+        "f1": 0.22760290556900725,
+        "support": 128
+      }
+    },
+    "confusion_matrix": [
+      [
+        110,
+        55,
+        299
+      ],
+      [
+        92,
+        139,
+        305
+      ],
+      [
+        34,
+        0,
+        94
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.4635416666666667,
+        "majority_within": 0.6666666666666666,
+        "margin": -0.20312499999999994,
+        "macro_f1": 0.31000542509493917
+      },
+      "SAM40": {
+        "accuracy": 0.45,
+        "majority_within": 0.75,
+        "margin": -0.3,
+        "macro_f1": 0.2881416883934191
+      },
+      "CogLoad": {
+        "accuracy": 0.0078125,
+        "majority_within": 0.6927083333333334,
+        "margin": -0.6848958333333334,
+        "macro_f1": 0.007326007326007327
+      }
+    },
+    "corpus_probe": 0.9164650537634408,
+    "corpus_probe_floor": 0.3404255319148936,
+    "embedding_dim": 200,
+    "verdict": "no better than device detection",
+    "architecture": "Deep4Net",
+    "norm": "subject",
+    "embedding": "penultimate",
+    "elapsed_sec": 1.7
+  }
+}

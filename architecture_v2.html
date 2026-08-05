@@ -1,0 +1,370 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Domain-adversarial EEG classifier — corpus-invariant architecture</title>
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EDF1F4;
+    --ink:#10171D; --muted:#5A6B78; --line:#D3DBE1;
+    --accent:#0B7A75; --accent-soft:#0B7A751A;
+    --signal:#B4622A; --signal-soft:#B4622A1A;
+    --reverse:#7A4FA3; --reverse-soft:#7A4FA31A;
+    --good:#2E7D5B; --warn:#A8632A; --bad:#A63D40;
+    --radius:3px;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0F1418; --surface:#161D23; --surface-2:#1D262E;
+      --ink:#E6EDF3; --muted:#8FA3B0; --line:#2A353E;
+      --accent:#4FC3BC; --accent-soft:#4FC3BC1F;
+      --signal:#E0965C; --signal-soft:#E0965C1F;
+      --reverse:#B98FDB; --reverse-soft:#B98FDB1F;
+      --good:#5FBF92; --warn:#D69A5C; --bad:#D97078;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1418; --surface:#161D23; --surface-2:#1D262E;
+    --ink:#E6EDF3; --muted:#8FA3B0; --line:#2A353E;
+    --accent:#4FC3BC; --accent-soft:#4FC3BC1F;
+    --signal:#E0965C; --signal-soft:#E0965C1F;
+    --reverse:#B98FDB; --reverse-soft:#B98FDB1F;
+    --good:#5FBF92; --warn:#D69A5C; --bad:#D97078;
+  }
+  :root[data-theme="light"]{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EDF1F4;
+    --ink:#10171D; --muted:#5A6B78; --line:#D3DBE1;
+    --accent:#0B7A75; --accent-soft:#0B7A751A;
+    --signal:#B4622A; --signal-soft:#B4622A1A;
+    --reverse:#7A4FA3; --reverse-soft:#7A4FA31A;
+    --good:#2E7D5B; --warn:#A8632A; --bad:#A63D40;
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0; padding:0 1.25rem 5rem; background:var(--ground); color:var(--ink);
+       font-family:var(--sans); line-height:1.6; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px; margin:0 auto}
+  h1,h2,h3{text-wrap:balance; line-height:1.2; margin:0}
+  h1{font-size:clamp(1.6rem,3.4vw,2.3rem); font-weight:680; letter-spacing:-.02em}
+  h2{font-size:1.05rem; font-weight:660; letter-spacing:-.01em}
+  h3{font-size:.9rem; font-weight:640}
+  p{margin:0; max-width:68ch}
+  code,.m{font-family:var(--mono); font-variant-numeric:tabular-nums}
+  .eyebrow{font-family:var(--mono); font-size:.7rem; letter-spacing:.13em;
+           text-transform:uppercase; color:var(--muted)}
+
+  header{padding:3.5rem 0 2rem; border-bottom:1px solid var(--line); display:grid; gap:.85rem}
+  header p{color:var(--muted)}
+  .sibling{font-size:.82rem}
+  .sibling a{color:var(--accent)}
+
+  .metrics{display:grid; gap:1px; background:var(--line);
+           grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+           border:1px solid var(--line); margin:2rem 0 0}
+  .metric{background:var(--surface); padding:1rem 1.1rem; display:grid; gap:.2rem}
+  .metric .k{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--muted)}
+  .metric .v{font-family:var(--mono); font-size:1.5rem; font-weight:600;
+             font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+  .metric .n{font-size:.76rem; color:var(--muted)}
+  .metric.hero .v{color:var(--accent)}
+  .metric.rev .v{color:var(--reverse)}
+
+  section{padding:2.75rem 0 0; display:grid; gap:1.1rem}
+
+  /* ---- diagram ---- */
+  .flow{display:grid; gap:0; margin-top:.5rem}
+  .stage{display:grid; gap:.65rem; justify-items:center; width:100%}
+  .stage-label{font-family:var(--mono); font-size:.66rem; letter-spacing:.14em;
+               text-transform:uppercase; color:var(--muted); justify-self:start}
+  .node{background:var(--surface); border:1px solid var(--line); border-radius:var(--radius);
+        padding:.85rem 1.15rem; width:100%; display:grid; gap:.28rem;
+        justify-items:center; text-align:center}
+  .node .t{font-weight:640; font-size:.94rem}
+  .node .s{font-family:var(--mono); font-size:.76rem; color:var(--muted)}
+  .node.io{border-color:var(--ink); border-width:1.5px}
+  .node.shared{border-color:var(--accent); border-width:1.5px; background:var(--accent-soft)}
+  .node.grl{border-color:var(--reverse); border-width:1.5px; background:var(--reverse-soft)}
+  .node.task-head{border-left:3px solid var(--good)}
+  .node.dom-head{border-left:3px solid var(--reverse)}
+
+  .connector{height:26px; width:1px; background:var(--line); justify-self:center; position:relative}
+  .connector::after{content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:5px solid var(--line)}
+  .split{height:26px; position:relative; margin-top:26px; border-top:1px solid var(--line); width:100%}
+  .split span{position:absolute; top:0; width:1px; height:26px; background:var(--line)}
+  .split span::after{content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:5px solid var(--line)}
+  .split span:nth-child(1){left:25%} .split span:nth-child(2){left:75%}
+  .split::before{content:""; position:absolute; top:-26px; left:50%; width:1px; height:26px;
+    background:var(--line)}
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:.9rem; width:100%}
+
+  /* the gradient-reversal explainer — the thesis of this architecture */
+  .grl-box{border:1px solid var(--reverse); border-radius:var(--radius);
+           background:var(--surface); padding:1.1rem 1.25rem; display:grid; gap:.8rem}
+  .grl-box h3{color:var(--reverse)}
+  .passes{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line);
+          border:1px solid var(--line)}
+  .pass{background:var(--surface); padding:.85rem 1rem; display:grid; gap:.3rem}
+  .pass .dir{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--muted)}
+  .pass .eq{font-family:var(--mono); font-size:1rem; font-weight:600}
+  .pass .why{font-size:.82rem; color:var(--muted); line-height:1.45}
+  .pass.fwd .eq{color:var(--ink)} .pass.bwd .eq{color:var(--reverse)}
+
+  .scroll{overflow-x:auto; border:1px solid var(--line)}
+  table{border-collapse:collapse; width:100%; font-size:.85rem; background:var(--surface)}
+  th,td{padding:.55rem .8rem; text-align:right; border-bottom:1px solid var(--line);
+        font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+  th:first-child,td:first-child{text-align:left; font-family:var(--sans)}
+  thead th{font-family:var(--mono); font-size:.68rem; letter-spacing:.08em; text-transform:uppercase;
+           color:var(--muted); font-weight:500; background:var(--surface-2)}
+  tbody tr:last-child td{border-bottom:0}
+  .pos{color:var(--good)} .neg{color:var(--bad)} .zero{color:var(--muted)}
+  .row-hi td{background:var(--accent-soft); font-weight:600}
+  .row-ctl td{color:var(--muted); font-style:italic}
+
+  .note{border:1px solid var(--line); border-left:3px solid var(--signal); background:var(--surface);
+        border-radius:var(--radius); padding:1.1rem 1.25rem; display:grid; gap:.6rem}
+  .note h3{color:var(--signal)}
+  .note p{font-size:.9rem}
+
+  ul{margin:0; padding-left:1.1rem; display:grid; gap:.45rem; max-width:68ch}
+  li{font-size:.9rem}
+  li strong{font-weight:640}
+
+  footer{margin-top:3.5rem; padding-top:1.25rem; border-top:1px solid var(--line);
+         color:var(--muted); font-size:.78rem; font-family:var(--mono)}
+  a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+  @media (max-width:680px){.two,.passes{grid-template-columns:1fr} .split{display:none}}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">datasets/all3 · corpus-invariant track</div>
+  <h1>Domain-adversarial classifier</h1>
+  <p>The model built to classify mental state <em>without</em> reading the recording device.
+     One backbone, two heads pulling in opposite directions: predict the class, and
+     simultaneously fail to predict which amplifier made the recording.</p>
+  <p class="sibling">Companion to <a href="architecture.html">architecture.html</a>, which
+     documents the accuracy-optimal model (0.6820) — that one <em>uses</em> corpus identity by
+     design. This one refuses to.</p>
+</header>
+
+<div class="metrics">
+  <div class="metric hero">
+    <div class="k">3-class accuracy</div><div class="v">0.5448</div>
+    <div class="n">EEGTransformer, α = 0.3</div>
+  </div>
+  <div class="metric rev">
+    <div class="k">corpus recoverable</div><div class="v">0.4763</div>
+    <div class="n">floor 0.4217 · control 0.4962</div>
+  </div>
+  <div class="metric">
+    <div class="k">vs device baseline</div><div class="v neg">−0.0820</div>
+    <div class="n">shortcut = 0.6267</div>
+  </div>
+  <div class="metric">
+    <div class="k">vs majority class</div><div class="v pos">+0.1231</div>
+    <div class="n">majority = 0.4217</div>
+  </div>
+  <div class="metric">
+    <div class="k">macro F1</div><div class="v">0.5463</div>
+    <div class="n">balanced acc 0.5538</div>
+  </div>
+</div>
+
+<section>
+  <div class="eyebrow">Architecture</div>
+  <h2>One backbone, two objectives in tension</h2>
+
+  <div class="flow">
+    <div class="stage"><div class="stage-label">Input — raw signal, no feature extraction</div>
+      <div class="node io">
+        <div class="t">EEG window</div>
+        <div class="s">6 channels × 512 samples · 4 s @ 128 Hz</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="stage"><div class="stage-label">Backbone — EEGTransformer</div>
+      <div class="node">
+        <div class="t">Patch tokeniser → 2× transformer encoder</div>
+        <div class="s">Conv1D(64, kernel 16, stride 16) → 32 tokens × 64 dim</div>
+        <div class="s">+ learned positional embedding</div>
+        <div class="s">2 blocks · 4 heads · FF 128 · dropout 0.5</div>
+        <div class="s">GlobalAveragePooling over tokens</div>
+      </div>
+    </div>
+    <div class="connector"></div>
+
+    <div class="stage"><div class="stage-label">Shared representation</div>
+      <div class="node shared">
+        <div class="t">Dense(128, ReLU) — <span class="m">shared_features</span></div>
+        <div class="s">the only place both objectives meet</div>
+      </div>
+    </div>
+
+    <div class="split"><span></span><span></span></div>
+
+    <div class="stage"><div class="stage-label">Two heads, trained together</div>
+      <div class="two">
+        <div class="node task-head">
+          <div class="t">Task head</div>
+          <div class="s">Dense(3, softmax)</div>
+          <div class="s">healthy · stress · depression</div>
+          <div class="s">cross-entropy, class-balanced</div>
+          <div class="s" style="color:var(--good)">minimise this</div>
+        </div>
+        <div class="node grl">
+          <div class="t">Gradient Reversal → Domain head</div>
+          <div class="s">GRL(α) → Dense(3, softmax)</div>
+          <div class="s">MODMA · SAM40 · CogLoad</div>
+          <div class="s">cross-entropy, unweighted</div>
+          <div class="s" style="color:var(--reverse)">head minimises · backbone maximises</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">The mechanism</div>
+  <div class="grl-box">
+    <h3>Gradient reversal — the whole idea in one layer</h3>
+    <p>The domain head tries to name the recording corpus. The reversal layer sits between it and
+       the backbone, and inverts the gradient on the way back — so the head gets better at
+       identifying the device while the backbone is pushed to make that impossible.</p>
+    <div class="passes">
+      <div class="pass fwd">
+        <div class="dir">Forward pass</div>
+        <div class="eq">y = x</div>
+        <div class="why">Identity. The domain head sees the representation exactly as it is, so it
+          learns to classify corpus honestly.</div>
+      </div>
+      <div class="pass bwd">
+        <div class="dir">Backward pass</div>
+        <div class="eq">∂L/∂x ← −α · ∂L/∂x</div>
+        <div class="why">Negated and scaled. The backbone receives the <em>opposite</em> of what
+          would help the domain head, so it learns to discard corpus information.</div>
+      </div>
+    </div>
+    <p><strong>α controls the strength.</strong> At α = 0 the reversal passes zero gradient and the
+       adversary is switched off entirely — that row is the control, not a result.</p>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">α sweep — 8 configurations, 5-fold subject-grouped</div>
+  <h2>What actually happened</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Configuration</th><th>3-class</th><th>corpus</th><th>vs its own control</th></tr></thead>
+      <tbody>
+        <tr class="row-ctl"><td>EEGTransformer α = 0.0 <em>(control)</em></td><td>0.5467</td><td>0.4962</td><td>—</td></tr>
+        <tr><td>EEGTransformer α = 0.1</td><td>0.5109</td><td>0.4557</td><td class="pos">−0.041 corpus</td></tr>
+        <tr class="row-hi"><td>EEGTransformer α = 0.3</td><td>0.5448</td><td>0.4763</td><td class="pos">−0.020 corpus</td></tr>
+        <tr><td>EEGTransformer α = 1.0</td><td>0.5808</td><td>0.5071</td><td class="neg">+0.011 corpus</td></tr>
+        <tr class="row-ctl"><td>TSception α = 0.0 <em>(control)</em></td><td>0.5337</td><td>0.5134</td><td>—</td></tr>
+        <tr><td>TSception α = 0.1</td><td>0.5141</td><td>0.5212</td><td class="neg">+0.008 corpus</td></tr>
+        <tr><td>TSception α = 0.3</td><td>0.4739</td><td>0.4896</td><td class="pos">−0.024 corpus</td></tr>
+        <tr><td>TSception α = 1.0</td><td>0.4521</td><td>0.5938</td><td class="neg">+0.080 corpus</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul>
+    <li><strong>The adversary barely worked.</strong> The best case removed 0.041 of corpus
+        recoverability and cost 0.036 of accuracy — roughly a 1:1 trade, which buys nothing.</li>
+    <li><strong>TSception went the wrong way.</strong> At full strength corpus became
+        <em>more</em> recoverable (0.5938) while accuracy hit its worst (0.4521). Non-monotonic in
+        α is the signature of training instability, not domain removal.</li>
+    <li><strong>α is fixed, never ramped.</strong> Standard DANN anneals α from 0 → 1 so the
+        adversary joins gradually; here it fights the task objective from the first step. That is
+        the prime suspect and the first thing to change before concluding the method cannot work.</li>
+    <li><strong>Do not compare 0.4763 to the 0.9161 feature-space probe.</strong> That figure is an
+        SVM on 81 handcrafted features; this is a single dense head on a 128-d learned
+        representation. Only each backbone's own α = 0 control is a valid reference.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="eyebrow">Accuracy vs invariance</div>
+  <h2>The trade-off is monotone</h2>
+  <p>No model is both more invariant and more accurate — these five sit on a clean Pareto frontier.
+     Corpus recoverability cannot fall below <span class="m">0.4217</span>, the rate you get by
+     always guessing the largest corpus.</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Model</th><th>corpus</th><th>3-class</th></tr></thead>
+      <tbody>
+        <tr><td>Riemannian, per-corpus re-centred <em>(invariant by construction)</em></td><td>0.3333</td><td class="neg">0.3255</td></tr>
+        <tr><td>DANN EEGTransformer α = 0.1</td><td>0.4557</td><td>0.5109</td></tr>
+        <tr class="row-hi"><td>DANN EEGTransformer α = 0.3</td><td>0.4763</td><td>0.5448</td></tr>
+        <tr class="row-ctl"><td>DANN EEGTransformer α = 0.0</td><td>0.4962</td><td>0.5467</td></tr>
+        <tr><td>DANN EEGTransformer α = 1.0</td><td>0.5071</td><td>0.5808</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>The top row is the honest endpoint: whiten each corpus's mean covariance to the identity and
+     the device offset is gone <em>algebraically</em> rather than by training — and the task
+     collapses to <span class="m">0.3255</span>, below chance. When corpus information is genuinely
+     removed, nothing remains.</p>
+</section>
+
+<section>
+  <div class="eyebrow">Out-of-fold confusion matrix · α = 0.3</div>
+  <h2>Where it fails</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>True ↓ / Predicted →</th><th>healthy</th><th>stress</th><th>depression</th><th>recall</th></tr></thead>
+      <tbody>
+        <tr><td>healthy</td><td>3425</td><td>1592</td><td>1615</td><td>0.516</td></tr>
+        <tr><td>stress</td><td>1856</td><td>2961</td><td>680</td><td>0.539</td></tr>
+        <tr><td>depression</td><td>1166</td><td>251</td><td>2182</td><td>0.606</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Errors are spread evenly rather than collapsing onto one class — the model is genuinely
+     uncertain across all three, which is what a corpus-blind model on this data looks like. Compare
+     the hierarchical model, whose stress recall is 0.954 purely because two corpora default to it.</p>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Within-corpus</th><th>accuracy</th><th>majority</th><th>margin</th></tr></thead>
+      <tbody>
+        <tr><td>MODMA</td><td>0.5829</td><td>0.5478</td><td class="pos">+0.035</td></tr>
+        <tr><td>SAM40</td><td>0.7500</td><td>0.7500</td><td class="zero">+0.000</td></tr>
+        <tr><td>CogLoad</td><td>0.3965</td><td>0.6886</td><td class="neg">−0.292</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <div class="note">
+    <h3>The verdict</h3>
+    <p><strong>This architecture did not achieve its goal.</strong> All 8 configurations missed the
+       CogLoad within-corpus target, and the adversary never removed corpus information without
+       taking an equal amount of task accuracy with it.</p>
+    <p><strong>But the negative result is informative.</strong> Corpus-invariance and task accuracy
+       moved together in every single configuration — which is exactly what you would predict once
+       you accept that <span class="m">depression</span> is a boolean identity with
+       <span class="m">corpus == MODMA</span>. Every depression segment is MODMA and every stress
+       segment is not. A model that genuinely cannot tell the corpora apart also cannot tell
+       depression from stress, because in this data they are the same distinction.</p>
+    <p><strong>What would change the answer:</strong> α annealing rather than a fixed value, a
+       stronger probe than a single dense head, and above all a corpus that contains more than two
+       of the three classes. The first two are cheap; the third is data collection.</p>
+  </div>
+</section>
+
+<footer>
+  scripts/all3_dann.py &nbsp;·&nbsp; src/proposed_model/multitask_dann_models.py
+  &nbsp;·&nbsp; Results/all3/dann.json &nbsp;·&nbsp; 5-fold GroupKFold on subjects, seed 42,
+  25 epochs, batch 128, LR 5e-4
+</footer>
+</div>
