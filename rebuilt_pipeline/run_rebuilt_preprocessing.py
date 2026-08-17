@@ -85,15 +85,25 @@ def modma_records():
     archives = sorted((DATA / "MODMA").glob("*.zip"))
     metadata = None
     recordings = []
-    for archive in archives:
-        with zipfile.ZipFile(archive) as z:
-            if metadata is None:
-                names = [n for n in z.namelist() if n.endswith(".xlsx") and "128channels_resting" in n]
-                if names:
-                    metadata = pd.read_excel(io.BytesIO(z.read(names[0])))
-            for name in z.namelist():
-                if "128channels_resting" in name and name.lower().endswith(".mat"):
-                    recordings.append((archive, name))
+    if archives:
+        for archive in archives:
+            with zipfile.ZipFile(archive) as z:
+                if metadata is None:
+                    names = [n for n in z.namelist() if n.endswith(".xlsx") and "128channels_resting" in n]
+                    if names:
+                        metadata = pd.read_excel(io.BytesIO(z.read(names[0])))
+                for name in z.namelist():
+                    if "128channels_resting" in name and name.lower().endswith(".mat"):
+                        recordings.append((archive, name))
+    else:
+        # The supplied MODMA release is extracted, rather than kept in ZIPs.
+        # Read the same native resting-state files and workbook in place.
+        base = DATA / "MODMA"
+        workbooks = sorted(p for p in base.rglob("*.xlsx") if "128channels_resting" in str(p).lower())
+        if workbooks:
+            metadata = pd.read_excel(workbooks[0])
+        recordings = [(None, p) for p in sorted(base.rglob("*.mat"))
+                      if "128channels_resting" in str(p).lower()]
     if metadata is None:
         raise RuntimeError("MODMA 128-channel resting metadata workbook was not found in the readable ZIP files.")
     labels = {str(int(row["subject id"])): int(str(row["type"]).strip() == "MDD")
@@ -105,8 +115,11 @@ def modma_records():
         native_id = str(int(match.group(1)))
         if native_id not in labels:
             continue
-        with zipfile.ZipFile(archive) as z:
-            mat = loadmat(io.BytesIO(z.read(name)))
+        if archive is None:
+            mat = loadmat(name)
+        else:
+            with zipfile.ZipFile(archive) as z:
+                mat = loadmat(io.BytesIO(z.read(name)))
         arrays = [v for k, v in mat.items() if not k.startswith("__") and isinstance(v, np.ndarray) and v.ndim == 2 and 128 <= v.shape[0] <= 129]
         if not arrays:
             raise RuntimeError(f"No 128-channel signal found in MODMA recording {name}")
@@ -114,7 +127,10 @@ def modma_records():
 
 
 def sam40_records():
-    for path in sorted((DATA / "SAM40" / "raw_data").glob("*.mat")):
+    raw_dir = DATA / "SAM40" / "raw_data"
+    if not raw_dir.is_dir():
+        raw_dir = DATA / "SAM40" / "Data" / "raw_data"
+    for path in sorted(raw_dir.glob("*.mat")):
         match = re.match(r"(.+)_sub_(\d+)_trial(\d+)\.mat$", path.name, re.I)
         if not match:
             continue
@@ -219,9 +235,10 @@ def main():
         report["corpora"][corpus] = {k: int(v) for k, v in values.items() if "::" not in k}
         subject_counts = defaultdict(lambda: {"flatline_rejected": 0, "variance_rejected": 0})
         for k, v in values.items():
-            if k.startswith("flatline_rejected::") or k.startswith("variance_rejected::"):
-                reason, subject = k.split("::", 1)
-                subject_counts[subject][reason] = int(v)
+            if k.startswith("flatline_subject::"):
+                subject_counts[k.split("::", 1)[1]]["flatline_rejected"] = int(v)
+            elif k.startswith("variance_subject::"):
+                subject_counts[k.split("::", 1)[1]]["variance_rejected"] = int(v)
         # Include every source subject, including those with no rejected segments.
         subjects = sorted({k.split("::", 1)[1] for k in values if k.startswith("subject_seen::")})
         with (out / f"{corpus.lower().replace(' ', '_')}_rejection_by_subject.csv").open("w", newline="", encoding="utf-8") as f:
