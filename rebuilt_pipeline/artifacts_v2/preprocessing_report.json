@@ -1,0 +1,78 @@
+{
+  "created_utc": "2026-08-17T15:04:23.576310+00:00",
+  "python": "3.11.5 (tags/v3.11.5:cce6ba9, Aug 24 2023, 14:38:34) [MSC v.1936 64 bit (AMD64)]",
+  "platform": "Windows-10-10.0.26200-SP0",
+  "numpy": "2.4.6",
+  "scipy": "1.17.1",
+  "parameters": {
+    "final_fs": 128,
+    "window_samples": 512,
+    "stride": 256,
+    "flatline_min_samples_at_128hz": 7,
+    "channels": [
+      "Fp1",
+      "Fp2",
+      "F7",
+      "F3",
+      "F4",
+      "F8"
+    ]
+  },
+  "corpora": {
+    "MODMA": {
+      "recordings": 53,
+      "initial_segments": 7959,
+      "final_segments": 7261,
+      "variance_rejected": 698
+    },
+    "SAM40": {
+      "recordings": 480,
+      "initial_segments": 5280,
+      "final_segments": 5115,
+      "variance_rejected": 165
+    },
+    "Cognitive Load": {
+      "recordings": 105,
+      "initial_segments": 4533,
+      "variance_rejected": 717,
+      "final_segments": 3755,
+      "flatline_rejected": 61
+    }
+  },
+  "errors": [],
+  "output_shape": [
+    16131,
+    6,
+    512
+  ],
+  "label_counts": {
+    "corpus": {
+      "MODMA": 7261,
+      "SAM40": 5115,
+      "Cognitive Load": 3755
+    },
+    "depression_label": {
+      "-1": 8870,
+      "0": 3953,
+      "1": 3308
+    },
+    "stress_label": {
+      "-1": 7261,
+      "1": 6858,
+      "0": 2012
+    },
+    "anchor_mask": {
+      "False": 10166,
+      "True": 5965
+    }
+  },
+  "unique_subjects_by_corpus": {
+    "MODMA": 50,
+    "SAM40": 40,
+    "Cognitive Load": 14
+  },
+  "normalization_diagnostics": {
+    "global_segment_median_abs_max": 0.0,
+    "global_segment_mad_median": 0.674490749835968
+  }
+}

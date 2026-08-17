@@ -218,3 +218,9 @@ __marimo__/
 
 # Local project files that must never be uploaded
 /NOTGITHUB/
+
+# Rebuilt EEG generated data and model artifacts
+rebuilt_pipeline/artifacts/
+rebuilt_pipeline/artifacts_v2/X_rebuilt.npy
+rebuilt_pipeline/results_v2/*.pt
+rebuilt_pipeline/results_v2/*_predictions.csv
