@@ -10,11 +10,11 @@ Evaluation uses a rigorous **Group-based Train/Val/Test split (70/10/20)** on su
 
 ## 📊 Summary of Combined Dataset Splits
 *   **Depression Classification (MODMA)**:
-    *   Train / Val / Test: 5723 / 746 / 1490 segments
+    *   Train / Val / Test: 5558 / 745 / 1506 segments
 *   **Stress Classification (SAM40, Cognitive Load, AMIGOS)**:
-    *   Train / Val / Test: 34688 / 3628 / 7502 segments
+    *   Train / Val / Test: 7620 / 754 / 2243 segments
 *   **Multi-Task (Full Dataset)**:
-    *   Train / Val / Test: 40411 / 4374 / 8992 segments
+    *   Train / Val / Test: 13178 / 1499 / 3749 segments
 
 ---
 
@@ -24,15 +24,15 @@ The models below were trained to classify Major Depressive Disorder (MDD) vs. He
 
 | Model Class | Model | Accuracy | Balanced Acc | Majority Baseline | Precision | Recall | F1-Score | ROC-AUC | Threshold | Training Time |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Classical ML (Feature-based) | SVM | 0.7121 | 0.7064 | 0.6000 | 0.6303 | 0.6779 | 0.6532 | 0.8080 | 0.97 | 4.89s |
-| Classical ML (Feature-based) | Random Forest | 0.5899 ⚠️ | 0.5761 | 0.6000 | 0.4879 | 0.5067 | 0.4971 | 0.5664 | 0.59 | 5.78s |
-| Classical ML (Feature-based) | XGBoost | 0.4664 ⚠️ | 0.4567 | 0.6000 | 0.3547 | 0.4077 | 0.3794 | 0.5441 | 0.55 | 30.32s |
-| Deep Learning (Raw EEG) | 1D CNN | 0.8013 | 0.7517 | 0.6000 | 1.0000 | 0.5034 | 0.6696 | 0.8668 | 0.92 | 122.49s |
-| Deep Learning (Raw EEG) | LSTM | 0.6107 | 0.5134 | 0.6000 | 1.0000 | 0.0268 | 0.0523 | 0.7915 | 0.95 | 14.32s |
-| Deep Learning (Raw EEG) | CNN-LSTM | 0.7745 | 0.7237 | 0.6000 | 0.9333 | 0.4698 | 0.6250 | 0.9477 | 0.16 | 11.39s |
-| Deep Learning (Raw EEG) | EEGNet | 0.4201 ⚠️ | 0.5168 | 0.6000 | 0.4082 | 1.0000 | 0.5798 | 0.9055 | 0.32 | 20.07s |
-| Deep Learning (Raw EEG) | TSception | 0.5893 ⚠️ | 0.4911 | 0.6000 | 0.0000 | 0.0000 | 0.0000 | 0.6391 | 0.52 | 27.09s |
-| Deep Learning (Raw EEG) | EEGTransformer | 0.6107 | 0.5134 | 0.6000 | 1.0000 | 0.0268 | 0.0523 | 0.8891 | 0.79 | 54.20s |
+| Classical ML (Feature-based) | SVM | 0.6992 | 0.6889 | 0.6042 | 0.6155 | 0.6393 | 0.6272 | 0.7520 | 0.99 | 2.48s |
+| Classical ML (Feature-based) | Random Forest | 0.6627 | 0.6450 | 0.6042 | 0.5759 | 0.5604 | 0.5680 | 0.5750 | 0.58 | 3.60s |
+| Classical ML (Feature-based) | XGBoost | 0.4801 ⚠️ | 0.4575 | 0.6042 | 0.3449 | 0.3490 | 0.3470 | 0.4716 | 0.75 | 1.84s |
+| Deep Learning (Raw EEG) | 1D CNN | 0.8048 | 0.7534 | 0.6042 | 1.0000 | 0.5067 | 0.6726 | 0.8098 | 0.59 | 16.76s |
+| Deep Learning (Raw EEG) | LSTM | 0.6155 | 0.5143 | 0.6042 | 1.0000 | 0.0285 | 0.0555 | 0.7063 | 0.90 | 10.64s |
+| Deep Learning (Raw EEG) | CNN-LSTM | 0.5956 ⚠️ | 0.6654 | 0.6042 | 0.4946 | 1.0000 | 0.6619 | 0.9055 | 0.16 | 4.64s |
+| Deep Learning (Raw EEG) | EEGNet | 0.6155 | 0.5143 | 0.6042 | 1.0000 | 0.0285 | 0.0555 | 0.5537 | 0.56 | 12.10s |
+| Deep Learning (Raw EEG) | TSception | 0.8048 | 0.7534 | 0.6042 | 1.0000 | 0.5067 | 0.6726 | 0.8725 | 0.48 | 12.82s |
+| Deep Learning (Raw EEG) | EEGTransformer | 0.7995 | 0.7478 | 0.6042 | 0.9868 | 0.5000 | 0.6637 | 0.8624 | 0.93 | 32.65s |
 
 ---
 
@@ -42,15 +42,15 @@ The models below were trained to classify cognitive stress/arousal states vs. re
 
 | Model Class | Model | Accuracy | Balanced Acc | Majority Baseline | Precision | Recall | F1-Score | ROC-AUC | Threshold | Training Time |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Classical ML (Feature-based) | SVM | 0.3242 ⚠️ | 0.4553 | 0.8268 | 0.7795 | 0.2547 | 0.3840 | 0.4030 | 0.96 | 61.62s |
-| Classical ML (Feature-based) | Random Forest | 0.7983 ⚠️ | 0.4843 | 0.8268 | 0.8222 | 0.9647 | 0.8878 | 0.4796 | 0.32 | 53.97s |
-| Classical ML (Feature-based) | XGBoost | 0.1772 ⚠️ | 0.4489 | 0.8268 | 0.5393 | 0.0332 | 0.0626 | 0.5051 | 0.90 | 187.34s |
-| Deep Learning (Raw EEG) | 1D CNN | 0.4339 ⚠️ | 0.4188 | 0.8268 | 0.7774 | 0.4419 | 0.5635 | 0.3400 | 0.61 | 69.84s |
-| Deep Learning (Raw EEG) | LSTM | 0.8179 ⚠️ | 0.4961 | 0.8268 | 0.8257 | 0.9884 | 0.8998 | 0.3962 | 0.30 | 50.54s |
-| Deep Learning (Raw EEG) | CNN-LSTM | 0.2890 ⚠️ | 0.3826 | 0.8268 | 0.7068 | 0.2394 | 0.3577 | 0.3809 | 0.68 | 20.45s |
-| Deep Learning (Raw EEG) | EEGNet | 0.8202 ⚠️ | 0.5227 | 0.8268 | 0.8336 | 0.9778 | 0.8999 | 0.4652 | 0.46 | 18.84s |
-| Deep Learning (Raw EEG) | TSception | 0.7933 ⚠️ | 0.4873 | 0.8268 | 0.8231 | 0.9553 | 0.8843 | 0.4774 | 0.31 | 18.65s |
-| Deep Learning (Raw EEG) | EEGTransformer | 0.7967 ⚠️ | 0.4818 | 0.8268 | 0.8215 | 0.9636 | 0.8869 | 0.3740 | 0.14 | 31.07s |
+| Classical ML (Feature-based) | SVM | 0.7272 | 0.5648 | 0.6910 | 0.7202 | 0.9897 | 0.8337 | 0.7496 | 0.09 | 8.05s |
+| Classical ML (Feature-based) | Random Forest | 0.6839 ⚠️ | 0.4964 | 0.6910 | 0.6895 | 0.9871 | 0.8119 | 0.7302 | 0.34 | 3.17s |
+| Classical ML (Feature-based) | XGBoost | 0.6964 | 0.5087 | 0.6910 | 0.6948 | 1.0000 | 0.8199 | 0.7485 | 0.13 | 168.93s |
+| Deep Learning (Raw EEG) | 1D CNN | 0.6126 ⚠️ | 0.5114 | 0.6910 | 0.6974 | 0.7761 | 0.7347 | 0.3736 | 0.52 | 12.47s |
+| Deep Learning (Raw EEG) | LSTM | 0.5412 ⚠️ | 0.4367 | 0.6910 | 0.6550 | 0.7103 | 0.6815 | 0.3624 | 0.63 | 12.08s |
+| Deep Learning (Raw EEG) | CNN-LSTM | 0.5635 ⚠️ | 0.4540 | 0.6910 | 0.6655 | 0.7406 | 0.7011 | 0.4783 | 0.80 | 10.06s |
+| Deep Learning (Raw EEG) | EEGNet | 0.5372 ⚠️ | 0.4541 | 0.6910 | 0.6631 | 0.6716 | 0.6673 | 0.3394 | 0.55 | 17.73s |
+| Deep Learning (Raw EEG) | TSception | 0.6826 ⚠️ | 0.5038 | 0.6910 | 0.6927 | 0.9716 | 0.8088 | 0.4338 | 0.56 | 10.34s |
+| Deep Learning (Raw EEG) | EEGTransformer | 0.6580 ⚠️ | 0.6002 | 0.6910 | 0.7531 | 0.7516 | 0.7523 | 0.5725 | 0.92 | 25.80s |
 
 ### Stress ROC-AUC by source corpus
 
@@ -59,17 +59,17 @@ The models below were trained to classify cognitive stress/arousal states vs. re
 > per-subject median split changes it by only −0.004). Read this breakdown, not the
 > pooled figure. Stress should be reported on **SAM40 / CogLoad** only.
 
-| Model | AMIGOS | CogLoad | SAM40 |
-| :--- | :--- | :--- | :--- |
-| SVM | 0.3522 | 0.7574 | 0.5584 |
-| Random Forest | 0.3947 | 0.6724 | 0.6423 |
-| XGBoost | 0.3849 | 0.7300 | 0.6633 |
-| 1D CNN | 0.3423 | 0.4419 | 0.6059 |
-| LSTM | 0.4650 | 0.2799 | 0.4281 |
-| CNN-LSTM | 0.4534 | 0.3982 | 0.6503 |
-| EEGNet | 0.5183 | 0.4287 | 0.4761 |
-| TSception | 0.4804 | 0.8836 | 0.5392 |
-| EEGTransformer | 0.4069 | 0.7905 | 0.5945 |
+| Model | CogLoad | SAM40 |
+| :--- | :--- | :--- |
+| SVM | 0.7674 | 0.6597 |
+| Random Forest | 0.7389 | 0.6537 |
+| XGBoost | 0.7691 | 0.6032 |
+| 1D CNN | 0.3348 | 0.5380 |
+| LSTM | 0.3317 | 0.5508 |
+| CNN-LSTM | 0.5128 | 0.6141 |
+| EEGNet | 0.2844 | 0.6105 |
+| TSception | 0.4364 | 0.6019 |
+| EEGTransformer | 0.6257 | 0.6222 |
 
 ### Depression at the subject level (10 held-out subjects)
 
@@ -81,14 +81,14 @@ The models below were trained to classify cognitive stress/arousal states vs. re
 
 | Model | Subject ROC-AUC | Subject Balanced Acc |
 | :--- | :--- | :--- |
-| SVM | 0.7917 | 0.5833 |
+| SVM | 0.5833 | 0.5833 |
 | Random Forest | 0.5833 | 0.5833 |
-| XGBoost | 0.5417 | 0.5833 |
-| 1D CNN | 0.8750 | 0.7917 |
-| LSTM | 0.8333 | 0.5833 |
+| XGBoost | 0.4583 | 0.5833 |
+| 1D CNN | 0.8333 | 0.7917 |
+| LSTM | 0.7083 | 0.5833 |
 | CNN-LSTM | 0.9583 | 0.7917 |
-| EEGNet | 0.9167 | 0.7917 |
-| TSception | 0.6250 | 0.5833 |
+| EEGNet | 0.5417 | 0.5833 |
+| TSception | 0.9167 | 0.7917 |
 | EEGTransformer | 0.8750 | 0.7917 |
 
 ---
@@ -100,15 +100,15 @@ A single **TSception** model backbone trained on the entire combined dataset to 
 
 | Multi-Task Evaluation Branch | Accuracy | Balanced Acc | Majority Baseline | Precision | Recall | F1-Score | ROC-AUC | Threshold | Joint Training Time |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| Depression Branch | 0.4403 ⚠️ | 0.5336 | 0.6000 | 0.4168 | 1.0000 | 0.5884 | 0.5584 | 0.00 | 22.91s |
-| Stress Branch | 0.8166 ⚠️ | 0.4938 | 0.8268 | 0.8251 | 0.9876 | 0.8990 | 0.5093 | 0.34 | 22.91s |
+| Depression Branch | 0.5896 ⚠️ | 0.6156 | 0.6042 | 0.4878 | 0.7399 | 0.5880 | 0.6151 | 0.14 | 11.34s |
+| Stress Branch | 0.4338 ⚠️ | 0.3466 | 0.6910 | 0.5932 | 0.5748 | 0.5839 | 0.4910 | 0.65 | 11.34s |
 
 ### 3.2 Domain Adversarial Neural Network (DANN)
 A **TSception** model incorporating a custom **Gradient Reversal Layer (GRL)**. It is trained to perform stress detection ('task' branch) while learning domain-invariant features by trying to confuse a dataset-origin classifier ('domain' branch).
 
 | Model Configuration | Accuracy | Balanced Acc | Majority Baseline | Precision | Recall | F1-Score | ROC-AUC | Threshold | Training Time |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| DANN Stress Task | 0.1853 ⚠️ | 0.4982 | 0.8268 | 0.8013 | 0.0195 | 0.0381 | 0.5677 | 0.74 | 18.32s |
+| DANN Stress Task | 0.7218 | 0.5498 | 0.6910 | 0.7130 | 1.0000 | 0.8324 | 0.4188 | 0.46 | 9.57s |
 
 ---
 
