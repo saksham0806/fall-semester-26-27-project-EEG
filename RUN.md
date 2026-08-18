@@ -156,3 +156,67 @@ groups = np.load("features/all3/subjects.npy", allow_pickle=True)  # split on th
 
 **Always split by `subjects`, and score 3-class accuracy against 0.6267 (corpus-ID shortcut),
 never against chance.** See `datasets/all3/README.md`.
+
+## Dataset structure reports
+
+```bash
+.venv/bin/python -u scripts/analyze_dataset_structure.py            # ~65 s, all 10 reports
+.venv/bin/python -u scripts/analyze_dataset_structure.py --smoke    # 2 files/corpus, ~20 s
+.venv/bin/python -u scripts/analyze_dataset_structure.py --only SAM40,AMIGOS
+```
+
+Scans every corpus on disk and writes one report per dataset to `datasets/structure/`:
+`MODMA_128ch_resting`, `MODMA_128ch_ERP`, `MODMA_3ch_resting`, `SAM40`, `CognitiveLoad`,
+`AMIGOS`, `WESAD`, `OSF_park`, `combined_data`, `all3`, plus a `README.md` index. Each
+covers file layout, filename→label parsing, montage, sampling rate, label schema, and
+per-channel min/max/variance/NaN/zero counts.
+
+`OSF_park` is the odd one out — CSV feature tables, no time series — and its report also
+recomputes a 4-class baseline (majority / demographics-only / band power / coherence), so
+that section takes a few seconds of SVM fitting rather than just reading files.
+
+Stats are accumulated streaming (count/sum/sumsq/min/max per channel), so the 17 GB of
+WESAD never lands in RAM at once. Peak RSS ~3 GB (the one WESAD pickle it loads). Heavy
+corpora are file-sampled — 12 of 53 MODMA `.mat`, 6 of 53 ERP `.raw` — and every report
+prints its own sample size. SAM40, CogLoad and AMIGOS are read in full.
+
+Generated, not live: **re-run after adding data or changing a loader**, or the reports go
+stale silently. Do not hand-edit them.
+
+⚠️ `datasets/.gitignore` is `*`, so these reports are **not version-controlled**. Add
+`!structure/` and `!structure/*.md` to that file if you want them tracked.
+
+## OSF_Park 4-class — healthy / depression / anxiety / stress (`OSF_Park_model/`)
+
+The one cohort in this project where all four target classes share a single feature schema,
+so class is **not** confounded with recording corpus the way `datasets/all3/` is. Tabular
+features (114 band powers + 1026 coherences), **not** raw EEG — nothing here touches the
+`(6, 512)` window pipeline.
+
+```bash
+# self-checks, seconds each
+.venv/bin/python -m OSF_Park_model.data     # 528 / 293 rows, band-major round-trip, symmetry
+.venv/bin/python -m OSF_Park_model.models   # 8 models forward; coherence bias wired in
+
+# harness proof: 1 seed, torch models at 8 epochs (~40 s)
+.venv/bin/python -u -m OSF_Park_model.run --task 4class --smoke
+
+# real runs: 3 seeds x 5-fold StratifiedKFold, 11 configs, CPU
+.venv/bin/python -u -m OSF_Park_model.run --task 4class    # n=528, 4 classes
+.venv/bin/python -u -m OSF_Park_model.run --task binary    # n=293, healthy vs depressed
+```
+
+Writes `Results/OSF_Park/<task>.json` after **every** model (a killed run keeps its finished
+rows), out-of-fold probabilities to `Results/OSF_Park/preds/`, and `OSF_Park_model/RESULTS_<task>.md`.
+
+⚠️ **The bar is demographics (~0.43), not chance (0.25) and not majority (0.377).** Age, sex,
+IQ and education alone beat every EEG configuration measured so far. `run.py` prints all three
+baselines plus a **recording-year probe** before any model, and will not write a table without
+them. Never quote an accuracy from this track alone.
+
+⚠️ **This file has no subject-identifier column** — `no.` indexes rows, not people, across
+2011–2018. `StratifiedKFold` is grouping by necessity, not by proof. Expected anchors: SVM on
+EEG ≈ 0.43, demographics ≈ 0.43. **Above ~0.75 means the split broke.**
+
+Full detail, including the two silent data-integrity fixes, in `OSF_Park_model/README.md`.
+

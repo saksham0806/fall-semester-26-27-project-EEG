@@ -1,0 +1,16 @@
+{
+  "corpus_shortcut_3class": 0.6755276100354852,
+  "leaky_random_segment_split": {
+    "dep": 0.720270151135915,
+    "stress": 0.733843772353785
+  },
+  "subject_grouped": {
+    "dep": 0.3873900739799711,
+    "stress": 0.7256484647050994
+  },
+  "class_counts": {
+    "healthy": 5863,
+    "stress": 6934,
+    "depression": 3266
+  }
+}
