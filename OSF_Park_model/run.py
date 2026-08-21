@@ -160,13 +160,13 @@ def markdown(task, base, probe, rows):
          f"Recording-year probe: **{probe['year_probe_acc']:.4f}** vs {probe['year_majority']:.4f} "
          f"majority over {probe['n_year_classes']} year classes.", "",
          "## Models", "",
-         "| model | accuracy | vs demo | balanced acc | macro-F1 | sec |",
+         "| model | **balanced acc** | macro-F1 | accuracy | vs demo | sec |",
          "|---|---:|---:|---:|---:|---:|"]
-    for r in sorted(rows, key=lambda r: -r["accuracy"]):
-        d = r["accuracy"] - base["demographics_only"]
-        L.append(f"| {r['model']} | {r['accuracy']:.4f} ±{r['accuracy_fold_std']:.3f} | "
-                 f"{d:+.4f} | {r['balanced_accuracy']:.4f} | {r['macro_f1']:.4f} | {r['elapsed_sec']:.0f} |")
-    best = max(rows, key=lambda r: r["accuracy"])
+    for r in sorted(rows, key=lambda r: -r["balanced_accuracy"]):     # rank on balanced acc,
+        d = r["accuracy"] - base["demographics_only"]        # never on raw accuracy
+        L.append(f"| {r['model']} | **{r['balanced_accuracy']:.4f}** | {r['macro_f1']:.4f} | "
+                 f"{r['accuracy']:.4f} ±{r['accuracy_fold_std']:.3f} | {d:+.4f} | {r['elapsed_sec']:.0f} |")
+    best = max(rows, key=lambda r: r["balanced_accuracy"])
     L += ["", f"## Per-class — {best['model']}", "",
           "| class | precision | recall | F1 | n |", "|---|---:|---:|---:|---:|"]
     for cl, v in best["per_class"].items():

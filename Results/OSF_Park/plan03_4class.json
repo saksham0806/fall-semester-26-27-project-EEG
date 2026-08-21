@@ -1,0 +1,287 @@
+{
+  "plan": "03",
+  "n_dev": 421,
+  "A_hierarchy": {
+    "composed": {
+      "model": "hierarchical (composed)",
+      "n": 421,
+      "balanced_accuracy": 0.34908125222504593,
+      "macro_f1": 0.3315187958943256,
+      "accuracy": 0.34441805225653205,
+      "macro_auc": 0.55916940090907,
+      "recall_per_class": {
+        "healthy": 0.6216216216216216,
+        "depression": 0.39622641509433965,
+        "anxiety": 0.16279069767441862,
+        "stress": 0.21568627450980393
+      },
+      "confusion": [
+        [
+          46,
+          23,
+          2,
+          3
+        ],
+        [
+          34,
+          63,
+          32,
+          30
+        ],
+        [
+          11,
+          47,
+          14,
+          14
+        ],
+        [
+          14,
+          48,
+          18,
+          22
+        ]
+      ],
+      "elapsed_sec": 2.9
+    },
+    "stage1_healthy_vs_ill": {
+      "balanced_accuracy": 0.7171184152452164,
+      "accuracy": 0.7878068091844814,
+      "majority": 0.8242280285035629,
+      "confusion": [
+        [
+          135,
+          87
+        ],
+        [
+          181,
+          860
+        ]
+      ],
+      "unguarded_balanced_accuracy": 0.7171184152452164,
+      "unguarded_accuracy": 0.7878068091844814,
+      "note": "reported row is the GUARDED output; when the guard fails every fold that is the majority fallback, so read unguarded_* to see what the classifier did"
+    },
+    "stage2_mood_anx_trauma": {
+      "balanced_accuracy": 0.34887066815415163,
+      "accuracy": 0.36503362151777136,
+      "majority": 0.45821325648414984,
+      "confusion": [
+        [
+          204,
+          133,
+          140
+        ],
+        [
+          110,
+          72,
+          76
+        ],
+        [
+          118,
+          84,
+          104
+        ]
+      ]
+    },
+    "guard_passed": {
+      "stage1": 15,
+      "stage2": 10,
+      "folds": 15
+    }
+  },
+  "B_stacking": {
+    "result": {
+      "model": "stacked (spectral+graph+demo)",
+      "n": 421,
+      "balanced_accuracy": 0.5030853001518669,
+      "macro_f1": 0.4389809760376876,
+      "accuracy": 0.4346793349168646,
+      "macro_auc": 0.7118104417115414,
+      "recall_per_class": {
+        "healthy": 0.7837837837837838,
+        "depression": 0.14465408805031446,
+        "anxiety": 0.5348837209302325,
+        "stress": 0.5490196078431373
+      },
+      "confusion": [
+        [
+          58,
+          3,
+          4,
+          9
+        ],
+        [
+          36,
+          23,
+          59,
+          41
+        ],
+        [
+          7,
+          15,
+          46,
+          18
+        ],
+        [
+          12,
+          11,
+          23,
+          56
+        ]
+      ],
+      "elapsed_sec": 5.4
+    },
+    "meta_weight": {
+      "spectral": 0.2395546054377896,
+      "graph": 0.2590451997701743,
+      "demo": 0.501400194792036
+    },
+    "insample_minus_oof": {
+      "spectral": 0.24149474824549008,
+      "graph": 0.4101396542791201,
+      "demo": 0.03107719843624889
+    }
+  },
+  "C_auxiliary": {
+    "control: 434 in-cohort ill only": {
+      "balanced_accuracy": 0.3437495518903773,
+      "accuracy": 0.36503362151777136,
+      "n_extra": 416
+    },
+    "auxiliary: all 850 ill": {
+      "balanced_accuracy": 0.35207029035591614,
+      "accuracy": 0.3813640730067243,
+      "n_extra": 416
+    },
+    "delta_from_extra_data": 0.008320738465538824,
+    "elapsed_sec": 6.7
+  },
+  "D_subgroups": {
+    "Acute stress disorder": {
+      "n": 27,
+      "pooled_label": "stress",
+      "recall": 0.48148148148148145,
+      "se": 0.09615902424319278
+    },
+    "Adjustment disorder": {
+      "n": 33,
+      "pooled_label": "stress",
+      "recall": 0.12121212121212122,
+      "se": 0.05681435554915709
+    },
+    "Depressive disorder": {
+      "n": 159,
+      "pooled_label": "depression",
+      "recall": 0.39622641509433965,
+      "se": 0.038789144811324276
+    },
+    "Healthy control": {
+      "n": 74,
+      "pooled_label": "healthy",
+      "recall": 0.6216216216216216,
+      "se": 0.05637808913501088
+    },
+    "Panic disorder": {
+      "n": 45,
+      "pooled_label": "anxiety",
+      "recall": 0.17777777777777778,
+      "se": 0.05699373055310028
+    },
+    "Posttraumatic stress disorder": {
+      "n": 42,
+      "pooled_label": "stress",
+      "recall": 0.11904761904761904,
+      "se": 0.049970296759725655
+    },
+    "Social anxiety disorder": {
+      "n": 41,
+      "pooled_label": "anxiety",
+      "recall": 0.14634146341463414,
+      "se": 0.05519933710725542
+    }
+  },
+  "results": [
+    {
+      "model": "hierarchical (composed)",
+      "n": 421,
+      "balanced_accuracy": 0.34908125222504593,
+      "macro_f1": 0.3315187958943256,
+      "accuracy": 0.34441805225653205,
+      "macro_auc": 0.55916940090907,
+      "recall_per_class": {
+        "healthy": 0.6216216216216216,
+        "depression": 0.39622641509433965,
+        "anxiety": 0.16279069767441862,
+        "stress": 0.21568627450980393
+      },
+      "confusion": [
+        [
+          46,
+          23,
+          2,
+          3
+        ],
+        [
+          34,
+          63,
+          32,
+          30
+        ],
+        [
+          11,
+          47,
+          14,
+          14
+        ],
+        [
+          14,
+          48,
+          18,
+          22
+        ]
+      ],
+      "elapsed_sec": 2.9
+    },
+    {
+      "model": "stacked (spectral+graph+demo)",
+      "n": 421,
+      "balanced_accuracy": 0.5030853001518669,
+      "macro_f1": 0.4389809760376876,
+      "accuracy": 0.4346793349168646,
+      "macro_auc": 0.7118104417115414,
+      "recall_per_class": {
+        "healthy": 0.7837837837837838,
+        "depression": 0.14465408805031446,
+        "anxiety": 0.5348837209302325,
+        "stress": 0.5490196078431373
+      },
+      "confusion": [
+        [
+          58,
+          3,
+          4,
+          9
+        ],
+        [
+          36,
+          23,
+          59,
+          41
+        ],
+        [
+          7,
+          15,
+          46,
+          18
+        ],
+        [
+          12,
+          11,
+          23,
+          56
+        ]
+      ],
+      "elapsed_sec": 5.4
+    }
+  ]
+}

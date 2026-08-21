@@ -1,0 +1,243 @@
+{
+  "plan": "01",
+  "task": "binary",
+  "n_dev": 233,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "majority": 0.6824034334763949,
+  "chance": 0.5,
+  "demo_bar": 0.7598164201937787,
+  "results": [
+    {
+      "model": "DEMO [l2]",
+      "n": 233,
+      "balanced_accuracy": 0.7598164201937787,
+      "macro_f1": 0.7340182648401826,
+      "accuracy": 0.7510729613733905,
+      "macro_auc": 0.832143464218936,
+      "recall_per_class": {
+        "healthy": 0.7837837837837838,
+        "depression": 0.7358490566037735
+      },
+      "confusion": [
+        [
+          58,
+          16
+        ],
+        [
+          42,
+          117
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "10 (5/15)"
+      },
+      "elapsed_sec": 5.8,
+      "p": 4,
+      "vs_demo": 0.0
+    },
+    {
+      "model": "SPECTRAL [elasticnet]",
+      "n": 233,
+      "balanced_accuracy": 0.5999915009348971,
+      "macro_f1": 0.5918453639383872,
+      "accuracy": 0.6266094420600858,
+      "macro_auc": 0.6509433962264151,
+      "recall_per_class": {
+        "healthy": 0.527027027027027,
+        "depression": 0.6729559748427673
+      },
+      "confusion": [
+        [
+          39,
+          35
+        ],
+        [
+          52,
+          107
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "1 (7/15)",
+        "logisticregression__l1_ratio": "0.5 (8/15)"
+      },
+      "elapsed_sec": 51.8,
+      "p": 136,
+      "vs_demo": -0.15982491925888165
+    },
+    {
+      "model": "GRAPH [elasticnet]",
+      "n": 233,
+      "balanced_accuracy": 0.6413394526602074,
+      "macro_f1": 0.637485737993984,
+      "accuracy": 0.6781115879828327,
+      "macro_auc": 0.7081421043685194,
+      "recall_per_class": {
+        "healthy": 0.5405405405405406,
+        "depression": 0.7421383647798742
+      },
+      "confusion": [
+        [
+          40,
+          34
+        ],
+        [
+          41,
+          118
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (14/15)",
+        "logisticregression__l1_ratio": "0.9 (5/15)"
+      },
+      "elapsed_sec": 31.8,
+      "p": 138,
+      "vs_demo": -0.11847696753357129
+    },
+    {
+      "model": "EEG [elasticnet]",
+      "n": 233,
+      "balanced_accuracy": 0.7016828148903621,
+      "macro_f1": 0.6915792689135526,
+      "accuracy": 0.721030042918455,
+      "macro_auc": 0.733299337072922,
+      "recall_per_class": {
+        "healthy": 0.6486486486486487,
+        "depression": 0.7547169811320755
+      },
+      "confusion": [
+        [
+          48,
+          26
+        ],
+        [
+          39,
+          120
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (11/15)",
+        "logisticregression__l1_ratio": "0.9 (6/15)"
+      },
+      "elapsed_sec": 75.6,
+      "p": 274,
+      "vs_demo": -0.0581336053034166
+    },
+    {
+      "model": "EEG+DEMO [elasticnet]",
+      "n": 233,
+      "balanced_accuracy": 0.7439656637769845,
+      "macro_f1": 0.7358440005771649,
+      "accuracy": 0.7639484978540773,
+      "macro_auc": 0.8435322114567397,
+      "recall_per_class": {
+        "healthy": 0.6891891891891891,
+        "depression": 0.7987421383647799
+      },
+      "confusion": [
+        [
+          51,
+          23
+        ],
+        [
+          32,
+          127
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (13/15)",
+        "logisticregression__l1_ratio": "0.5 (11/15)"
+      },
+      "elapsed_sec": 63.7,
+      "p": 278,
+      "vs_demo": -0.01585075641679423
+    },
+    {
+      "model": "EEG [l2]",
+      "n": 233,
+      "balanced_accuracy": 0.6814125446200918,
+      "macro_f1": 0.6744205161926682,
+      "accuracy": 0.7081545064377682,
+      "macro_auc": 0.7419683834778175,
+      "recall_per_class": {
+        "healthy": 0.6081081081081081,
+        "depression": 0.7547169811320755
+      },
+      "confusion": [
+        [
+          45,
+          29
+        ],
+        [
+          39,
+          120
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.01 (12/15)"
+      },
+      "elapsed_sec": 2.5,
+      "p": 274,
+      "vs_demo": -0.07840387557368689
+    },
+    {
+      "model": "EEG [rbf]",
+      "n": 233,
+      "balanced_accuracy": 0.6217491075981643,
+      "macro_f1": 0.6283891547049442,
+      "accuracy": 0.7253218884120172,
+      "macro_auc": 0.7549719530851606,
+      "recall_per_class": {
+        "healthy": 0.33783783783783783,
+        "depression": 0.9056603773584906
+      },
+      "confusion": [
+        [
+          25,
+          49
+        ],
+        [
+          15,
+          144
+        ]
+      ],
+      "selected_params": {
+        "svc__C": "1 (10/15)"
+      },
+      "elapsed_sec": 1.9,
+      "p": 274,
+      "vs_demo": -0.13806731259561444
+    },
+    {
+      "model": "RAW_BASELINE [rbf]",
+      "n": 233,
+      "balanced_accuracy": 0.7032976372599014,
+      "macro_f1": 0.7159386285740574,
+      "accuracy": 0.7725321888412017,
+      "macro_auc": 0.8099609043005269,
+      "recall_per_class": {
+        "healthy": 0.5135135135135135,
+        "depression": 0.8930817610062893
+      },
+      "confusion": [
+        [
+          38,
+          36
+        ],
+        [
+          17,
+          142
+        ]
+      ],
+      "selected_params": {
+        "svc__C": "1 (9/15)"
+      },
+      "elapsed_sec": 5.7,
+      "p": 1140,
+      "vs_demo": -0.056518782933877354
+    }
+  ]
+}

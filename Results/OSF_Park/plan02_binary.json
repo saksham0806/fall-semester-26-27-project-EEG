@@ -1,0 +1,123 @@
+{
+  "plan": "02",
+  "task": "binary",
+  "n_dev": 233,
+  "arms": {
+    "no IQ": {
+      "demographics": {
+        "model": "demographics only [no IQ]",
+        "n": 233,
+        "balanced_accuracy": 0.5987166411694713,
+        "macro_f1": 0.581850811485643,
+        "accuracy": 0.6051502145922747,
+        "macro_auc": 0.733724290328064,
+        "recall_per_class": {
+          "healthy": 0.581081081081081,
+          "depression": 0.6163522012578616
+        },
+        "confusion": [
+          [
+            43,
+            31
+          ],
+          [
+            61,
+            98
+          ]
+        ]
+      },
+      "demographics_plus_residual_eeg": {
+        "model": "demographics + residualized EEG [no IQ]",
+        "n": 233,
+        "balanced_accuracy": 0.7349991500934898,
+        "macro_f1": 0.721658668934378,
+        "accuracy": 0.7467811158798283,
+        "macro_auc": 0.8274689784123747,
+        "recall_per_class": {
+          "healthy": 0.7027027027027027,
+          "depression": 0.7672955974842768
+        },
+        "confusion": [
+          [
+            52,
+            22
+          ],
+          [
+            37,
+            122
+          ]
+        ]
+      },
+      "delta_auc": {
+        "delta_auc": 0.09374468808431069,
+        "ci95": [
+          0.022151109769568602,
+          0.16497340305512292
+        ],
+        "n_boot": 2000,
+        "excludes_zero": true
+      },
+      "normative_r2_heldout_healthy": -0.2991529754973649,
+      "healthy_controls_per_fold": 59,
+      "elapsed_sec": 6.8
+    },
+    "with IQ": {
+      "demographics": {
+        "model": "demographics only [with IQ]",
+        "n": 233,
+        "balanced_accuracy": 0.7535271120176781,
+        "macro_f1": 0.7260971786833856,
+        "accuracy": 0.7424892703862661,
+        "macro_auc": 0.8359680435152134,
+        "recall_per_class": {
+          "healthy": 0.7837837837837838,
+          "depression": 0.7232704402515723
+        },
+        "confusion": [
+          [
+            58,
+            16
+          ],
+          [
+            44,
+            115
+          ]
+        ]
+      },
+      "demographics_plus_residual_eeg": {
+        "model": "demographics + residualized EEG [with IQ]",
+        "n": 233,
+        "balanced_accuracy": 0.7772819989801122,
+        "macro_f1": 0.7661073894249483,
+        "accuracy": 0.7896995708154506,
+        "macro_auc": 0.8592554818969913,
+        "recall_per_class": {
+          "healthy": 0.7432432432432432,
+          "depression": 0.8113207547169812
+        },
+        "confusion": [
+          [
+            55,
+            19
+          ],
+          [
+            30,
+            129
+          ]
+        ]
+      },
+      "delta_auc": {
+        "delta_auc": 0.023287438381777936,
+        "ci95": [
+          -0.034708301798303656,
+          0.07894175603774753
+        ],
+        "n_boot": 2000,
+        "excludes_zero": false
+      },
+      "normative_r2_heldout_healthy": -0.3065446958018371,
+      "healthy_controls_per_fold": 59,
+      "elapsed_sec": 6.7
+    }
+  }
+}
