@@ -1,6 +1,6 @@
 # OSF_Park BRMH — 4class
 
-n = 528 recordings. Out-of-fold over 5 folds (StratifiedKFold x 1 seeds). No subject IDs exist in this file, so grouping is impossible — see README.
+n = 528 recordings. Out-of-fold over 15 folds (StratifiedKFold x 3 seeds). No subject IDs exist in this file, so grouping is impossible — see README.
 
 ## Baselines — read every row below against these
 
@@ -16,26 +16,26 @@ Recording-year probe: **0.2179** vs 0.2443 majority over 8 year classes.
 
 | model | accuracy | vs demo | balanced acc | macro-F1 | sec |
 |---|---:|---:|---:|---:|---:|
-| SVM [demographics only] | 0.4356 ±0.044 | +0.0417 | 0.4008 | 0.3720 | 1 |
-| SVM [EEG+demographics] | 0.4356 ±0.011 | +0.0417 | 0.3535 | 0.2733 | 4 |
-| SVM [EEG] | 0.4337 ±0.020 | +0.0398 | 0.3480 | 0.2693 | 4 |
-| GradientBoosting [EEG] | 0.3655 ±0.054 | -0.0284 | 0.3184 | 0.3178 | 6 |
-| RandomForest [EEG] | 0.3485 ±0.035 | -0.0454 | 0.3264 | 0.3172 | 7 |
-| GatedHybrid [no demographics] | 0.3258 ±0.040 | -0.0682 | 0.3451 | 0.3236 | 2 |
-| LogisticRegression [EEG] | 0.3239 ±0.043 | -0.0701 | 0.3159 | 0.3221 | 7 |
-| GatedHybrid [+demographics] | 0.3144 ±0.075 | -0.0795 | 0.3401 | 0.3130 | 2 |
-| MLP [EEG] | 0.3011 ±0.067 | -0.0928 | 0.3378 | 0.3009 | 2 |
-| ChannelTransformer [AB] | 0.2917 ±0.014 | -0.1023 | 0.3175 | 0.2805 | 2 |
-| CohTransformer [AB+COH bias] | 0.2652 ±0.031 | -0.1288 | 0.2963 | 0.2607 | 2 |
+| SVM [demographics only] | 0.4299 ±0.038 | +0.0360 | 0.3914 | 0.3461 | 1 |
+| SVM [EEG] | 0.4261 ±0.018 | +0.0322 | 0.3416 | 0.2626 | 8 |
+| SVM [EEG+demographics] | 0.4261 ±0.016 | +0.0322 | 0.3430 | 0.2632 | 8 |
+| GradientBoosting [EEG] | 0.3864 ±0.034 | -0.0076 | 0.3276 | 0.3172 | 19 |
+| RandomForest [EEG] | 0.3466 ±0.033 | -0.0473 | 0.3265 | 0.3175 | 12 |
+| LogisticRegression [EEG] | 0.3447 ±0.050 | -0.0492 | 0.3389 | 0.3430 | 26 |
+| GatedHybrid [no demographics] | 0.3447 ±0.057 | -0.0492 | 0.3707 | 0.3442 | 14 |
+| MLP [EEG] | 0.3390 ±0.054 | -0.0549 | 0.3710 | 0.3392 | 6 |
+| GatedHybrid [+demographics] | 0.3239 ±0.061 | -0.0701 | 0.3560 | 0.3252 | 14 |
+| CohTransformer [AB+COH bias] | 0.2917 ±0.049 | -0.1023 | 0.3246 | 0.2898 | 13 |
+| ChannelTransformer [AB] | 0.2879 ±0.039 | -0.1060 | 0.3133 | 0.2794 | 12 |
 
 ## Per-class — SVM [demographics only]
 
 | class | precision | recall | F1 | n |
 |---|---:|---:|---:|---:|
-| healthy | 0.521 | 0.649 | 0.578 | 94 |
-| depression | 0.414 | 0.698 | 0.520 | 199 |
-| anxiety | 0.500 | 0.131 | 0.207 | 107 |
-| stress | 0.340 | 0.125 | 0.183 | 128 |
+| healthy | 0.516 | 0.670 | 0.583 | 94 |
+| depression | 0.413 | 0.724 | 0.526 | 199 |
+| anxiety | 0.357 | 0.093 | 0.148 | 107 |
+| stress | 0.345 | 0.078 | 0.127 | 128 |
 
 ## Explainability — SVM [demographics only]
 
@@ -162,68 +162,68 @@ Recording-year probe: **0.2179** vs 0.2443 majority over 8 year classes.
 
 ## Explainability — MLP [EEG]
 
-**Permutation importance (balanced-acc drop, base 0.267)**
+**Permutation importance (balanced-acc drop, base 0.330)**
 
 | feature | importance |
 |---|---:|
-| theta | +0.0251 ±0.0097 |
-| C3 | +0.0211 ±0.0121 |
-| Pz | +0.0211 ±0.0056 |
-| Fz | +0.0207 ±0.0062 |
-| O2 | +0.0175 ±0.0053 |
-| FP1 | +0.0171 ±0.0159 |
-| highbeta | +0.0166 ±0.0115 |
-| Cz | +0.0163 ±0.0062 |
+| COH block | +0.0637 ±0.0255 |
+| beta | +0.0372 ±0.0079 |
+| FP2 | +0.0209 ±0.0059 |
+| F7 | +0.0108 ±0.0107 |
+| C3 | +0.0105 ±0.0056 |
+| highbeta | +0.0094 ±0.0068 |
+| F3 | +0.0083 ±0.0029 |
+| gamma | +0.0083 ±0.0029 |
 
 **Gradient x input by band**
 
 | feature | importance |
 |---|---:|
-| delta | 0.0309 |
-| beta | 0.0289 |
-| alpha | 0.0261 |
-| highbeta | 0.0254 |
-| theta | 0.0248 |
-| gamma | 0.0241 |
+| beta | 0.1283 |
+| delta | 0.0987 |
+| theta | 0.0791 |
+| highbeta | 0.0592 |
+| gamma | 0.0484 |
+| alpha | 0.0473 |
 
 ## Explainability — ChannelTransformer [AB]
 
-**Permutation importance (balanced-acc drop, base 0.335)**
+**Permutation importance (balanced-acc drop, base 0.328)**
 
 | feature | importance |
 |---|---:|
-| theta | +0.0816 ±0.0117 |
-| beta | +0.0763 ±0.0222 |
-| alpha | +0.0308 ±0.0204 |
-| gamma | +0.0302 ±0.0121 |
-| P4 | +0.0283 ±0.0107 |
-| highbeta | +0.0234 ±0.0185 |
-| F7 | +0.0202 ±0.0161 |
-| C4 | +0.0195 ±0.0128 |
+| beta | +0.0686 ±0.0205 |
+| theta | +0.0364 ±0.0226 |
+| O1 | +0.0302 ±0.0211 |
+| delta | +0.0288 ±0.0242 |
+| FP1 | +0.0244 ±0.0213 |
+| alpha | +0.0208 ±0.0130 |
+| gamma | +0.0176 ±0.0079 |
+| highbeta | +0.0126 ±0.0135 |
 
 **Gradient x input by band**
 
 | feature | importance |
 |---|---:|
-| beta | 0.2160 |
-| delta | 0.1699 |
-| alpha | 0.1277 |
-| theta | 0.0772 |
-| highbeta | 0.0717 |
-| gamma | 0.0592 |
+| beta | 0.3621 |
+| highbeta | 0.2530 |
+| delta | 0.2474 |
+| gamma | 0.2075 |
+| alpha | 0.2043 |
+| theta | 0.1953 |
 
 **Attention received per channel**
 
 | feature | importance |
 |---|---:|
-| T3 | 0.0546 |
-| F7 | 0.0545 |
-| FP1 | 0.0541 |
-| FP2 | 0.0537 |
-| T5 | 0.0536 |
-| F8 | 0.0531 |
-| T4 | 0.0531 |
-| O1 | 0.0530 |
+| T3 | 0.0599 |
+| F7 | 0.0593 |
+| FP1 | 0.0555 |
+| T5 | 0.0551 |
+| F8 | 0.0550 |
+| FP2 | 0.0546 |
+| O1 | 0.0544 |
+| T4 | 0.0540 |
 
 ## Explainability — CohTransformer [AB+COH bias]
 
@@ -301,36 +301,36 @@ Recording-year probe: **0.2179** vs 0.2443 majority over 8 year classes.
 
 ## Explainability — GatedHybrid [+demographics]
 
-**Permutation importance (balanced-acc drop, base 0.363)**
+**Permutation importance (balanced-acc drop, base 0.352)**
 
 | feature | importance |
 |---|---:|
-| COH block | +0.0953 ±0.0234 |
-| DEMO block | +0.0547 ±0.0084 |
-| beta | +0.0304 ±0.0166 |
-| highbeta | +0.0262 ±0.0088 |
-| delta | +0.0196 ±0.0091 |
-| FP1 | +0.0129 ±0.0054 |
-| F7 | +0.0129 ±0.0141 |
-| theta | +0.0128 ±0.0121 |
+| COH block | +0.0825 ±0.0261 |
+| DEMO block | +0.0405 ±0.0129 |
+| highbeta | +0.0324 ±0.0229 |
+| theta | +0.0181 ±0.0065 |
+| T4 | +0.0129 ±0.0091 |
+| P4 | +0.0129 ±0.0091 |
+| T5 | +0.0129 ±0.0071 |
+| T6 | +0.0095 ±0.0045 |
 
 **Attention received per channel**
 
 | feature | importance |
 |---|---:|
-| F7 | 0.0553 |
-| T3 | 0.0540 |
-| O1 | 0.0536 |
-| FP1 | 0.0535 |
-| F8 | 0.0534 |
-| P3 | 0.0533 |
-| T5 | 0.0530 |
-| FP2 | 0.0530 |
+| F7 | 0.0564 |
+| T3 | 0.0545 |
+| O1 | 0.0542 |
+| F8 | 0.0539 |
+| P3 | 0.0538 |
+| FP1 | 0.0536 |
+| T5 | 0.0532 |
+| T4 | 0.0528 |
 
 **Gate weight per branch**
 
 | feature | importance |
 |---|---:|
-| COH projection | 0.6649 |
-| AB transformer | 0.2549 |
-| demographics | 0.0802 |
+| COH projection | 0.7004 |
+| AB transformer | 0.2316 |
+| demographics | 0.0680 |

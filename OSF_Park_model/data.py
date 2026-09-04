@@ -22,11 +22,16 @@ CLASSES_2 = ["healthy", "depression"]
 BANDS = ["delta", "theta", "alpha", "beta", "highbeta", "gamma"]
 DEMO_COLS = ["age", "sex", "IQ", "education"]
 
-# Rows whose entire 114-column AB block is byte-identical to another row (3 pairs, see
-# datasets/structure/OSF_park.md).  Only 205/206/944 fall inside the 4-class subset, and
-# only 205<->206 are a pair *within* it -- identical features in train and test is fold
-# leakage, so one of them goes.  944's partner (226) is outside the subset, so 944 stays.
-DROP_NO = [206]
+# Rows whose entire 114-column AB block is byte-identical to another row.  Verified pairs:
+#   205 <-> 206   both Healthy control
+#   226 <-> 944   Behavioral addiction  <->  Healthy control   <-- contradictory
+#   264 <-> 265   both OCD
+# 206 goes because 205<->206 is a pair *within* the 4-class subset: identical features in
+# train and test is fold leakage.  944 goes because its AB block is byte-identical to a
+# different person's, so its band powers are probably not its own -- a row whose spectral
+# half is known-corrupt does not belong in a spectral experiment.
+# Cost falls on the smallest class: healthy 95 -> 93.
+DROP_NO = [206, 944]
 
 
 def _blocks(df):
@@ -111,6 +116,25 @@ class Cohort:
         return len(self.y)
 
 
+ILL6 = ["Mood disorder", "Anxiety disorder", "Trauma and stress related disorder",
+        "Addictive disorder", "Schizophrenia", "Obsessive compulsive disorder"]
+
+
+def ill_cohort():
+    """All 850 non-healthy subjects labelled by main.disorder (6 classes).
+
+    Plan 03C auxiliary task.  NOTE these 417 extra subjects add NO healthy controls -- there
+    are only 95 in the entire file and all are already in the 4-class cohort.  So this data
+    cannot relieve a bottleneck caused by too few healthy controls; it can only sharpen the
+    model of what ill resting-state EEG looks like.
+    """
+    df = load_brmh()
+    df = df.copy()
+    df = df[df["main.disorder"].isin(ILL6) & ~df["no."].isin(DROP_NO)]
+    df["_y"] = df["main.disorder"]
+    return Cohort(df, ILL6)
+
+
 def cohort(task="4class"):
     df = load_brmh()
     df = df.copy()
@@ -179,8 +203,8 @@ AB_BAND_COLS = lambda bi: list(range(bi * 19, (bi + 1) * 19))
 
 def _selfcheck():
     c4, c2 = cohort("4class"), cohort("binary")
-    assert len(c4) == 528, len(c4)          # 529 in the subset, minus the duplicate row 206
-    assert len(c2) == 293, len(c2)
+    assert len(c4) == 527, len(c4)          # 529 in the subset, minus rows 206 and 944
+    assert len(c2) == 292, len(c2)
     assert c4.AB.shape[1] == 114 and c4.COH.shape[1] == 1026
     for name, blk in (("AB", c4.AB), ("COH", c4.COH), ("DEMO", c4.DEMO)):
         assert np.isfinite(blk).all(), f"{name} has NaN/inf"
@@ -188,7 +212,7 @@ def _selfcheck():
 
     # band-major round-trip: pin the tensor against explicitly named columns
     t = c4.channel_tensor()
-    assert t.shape == (528, 19, 6)
+    assert t.shape == (527, 19, 6)
     for band, ch in (("delta", "FP1"), ("gamma", "O2"), ("alpha", "Cz")):
         col = [x for x in c4.ab_cols if x.split(".")[2] == band and x.split(".")[4] == ch]
         assert len(col) == 1, col
@@ -197,7 +221,7 @@ def _selfcheck():
         assert np.allclose(got, want), f"{band}/{ch} scrambled -- layout is band-major"
 
     m = c4.coh_matrix()
-    assert m.shape == (528, 6, 19, 19)
+    assert m.shape == (527, 6, 19, 19)
     assert np.allclose(m, m.transpose(0, 1, 3, 2)), "coherence not symmetric"
     assert np.allclose(m[:, 0, 0, 1], c4.df["COH.A.delta.a.FP1.b.FP2"].to_numpy(np.float32))
     assert np.allclose(m[:, 5, 17, 18], c4.df["COH.F.gamma.r.O1.s.O2"].to_numpy(np.float32))
@@ -207,15 +231,15 @@ def _selfcheck():
     for tr, te in folds:
         assert not set(tr) & set(te)
         assert len(set(c4.y[te])) == 4
-    assert sorted(np.concatenate([te for _, te in folds[:5]])).__len__() == 528
+    assert sorted(np.concatenate([te for _, te in folds[:5]])).__len__() == 527
 
     counts = dict(zip(*np.unique(c4.df["_y"], return_counts=True)))
     print(f"4class n={len(c4)} {counts}")
     print(f"binary n={len(c2)}  AB={c4.AB.shape} COH={c4.COH.shape} DEMO={c4.DEMO.shape}")
     print(f"years {c4.year.min()}-{c4.year.max()}  majority={max(counts.values())/len(c4):.4f}")
     b, sc = to_blocks(c4)
-    assert b["chan"].shape == (528, 19, 6) and b["coh"].shape == (528, 6, 19, 19)
-    assert b["flat"].shape == (528, 1140) and b["cohflat"].shape == (528, 1026)
+    assert b["chan"].shape == (527, 19, 6) and b["coh"].shape == (527, 6, 19, 19)
+    assert b["flat"].shape == (527, 1140) and b["cohflat"].shape == (527, 1026)
     assert torch.allclose(b["coh"], b["coh"].transpose(2, 3))
     assert abs(b["flat"].mean().item()) < 1e-4 and abs(b["flat"].std().item() - 1) < 1e-2
     # a channel's AB columns must be exactly its slice of the channel tensor
