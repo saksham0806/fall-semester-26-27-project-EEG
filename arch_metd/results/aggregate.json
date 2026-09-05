@@ -1,0 +1,26 @@
+{
+  "depression / modma [subject]": {
+    "auc": 0.5646551724137931,
+    "ci_lo": 0.4163832472331424,
+    "ci_hi": 0.7212679492365255,
+    "n": 53,
+    "n_pos": 24,
+    "crosses_chance": true
+  },
+  "depression / mumtaz [subject]": {
+    "auc": 0.9385775862068966,
+    "ci_lo": 0.8657956291020807,
+    "ci_hi": 0.9924731182795699,
+    "n": 61,
+    "n_pos": 32,
+    "crosses_chance": false
+  },
+  "depression / pooled [subject] (secondary)": {
+    "auc": 0.8051108374384236,
+    "ci_lo": 0.7217442714790834,
+    "ci_hi": 0.8815390860609287,
+    "n": 114,
+    "n_pos": 56,
+    "crosses_chance": false
+  }
+}

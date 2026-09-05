@@ -27,14 +27,6 @@ fail() { echo "ERROR: $*" >&2; exit 1; }
 [ -f "$DATA" ] || fail "$DATA is missing. Copy it up:
     rsync -avP datasets/metd/ <you>@<box>:~/eeg/datasets/metd/"
 
-# a truncated rsync of a 485 MB file fails much later and much more confusingly
-echo "checking $DATA ..."
-GOT=$(md5sum "$DATA" | cut -d' ' -f1)
-[ "$GOT" = "$DATA_MD5" ] || fail "$DATA is corrupt or stale.
-    expected $DATA_MD5
-    got      $GOT
-  Re-copy it, or rebuild it on the laptop with: python -m arch_metd.data.build"
-
 command -v docker >/dev/null || fail "docker not found on this host"
 nvidia-smi -L >/dev/null 2>&1 || fail "no GPU visible on the host — check nvidia-smi"
 nvidia-smi --query-gpu=name,memory.total --format=csv,noheader
@@ -71,22 +63,38 @@ set -euo pipefail
 echo '=== container: GPU check ==='
 python -c 'import torch; assert torch.cuda.is_available(), \"container sees no GPU\"; print(torch.__version__, torch.version.cuda, torch.cuda.get_device_name(0))'
 
+echo '=== data provenance ==='
+# Not a byte checksum: two boxes rebuilding from the same corpora can differ in gate
+# decisions at floating-point boundaries and in row order, and results computed against
+# different arrays are not comparable in ways no summary statistic reveals. Print the
+# fingerprint so a mismatch with the laptop is one line, not a forensic exercise.
+python -m arch_metd.data.build --fingerprint
+echo 'if that fingerprint differs from the laptop, the arrays differ — say so before'
+echo 'comparing any result against previous numbers.'
+
 echo '=== gates (seconds, no training) ==='
 python -m arch_metd.models.mtdann      # GRL sign, anchor gate, masked loss, max-norm
 python -m arch_metd.train.folds        # no subject on both sides, EEGMAT held out
+python -m arch_metd.eval.aggregate --selfcheck-only
 
 echo '=== smoke run ==='
 python -u -m arch_metd.train.loop --smoke
 
 if [ \"\$SMOKE_ONLY\" = 1 ]; then echo 'smoke only — stopping here'; exit 0; fi
 
-echo '=== full nested CV ==='
-python -u -m arch_metd.train.loop 2>&1 | tee arch_metd/results/train.log
+echo '=== full nested CV: main + the three §8.3 controls ==='
+# The controls cost the same as the main run and are what make it interpretable — a
+# result with no method-off comparison is unfalsifiable. Do them in one session rather
+# than discovering later that a second GPU trip is needed.
+python -u -m arch_metd.train.loop --all-modes 2>&1 | tee arch_metd/results/train.log
 "
 
 echo
 echo "done. results in arch_metd/results/:"
 ls -la arch_metd/results/
+echo
+echo "the aggregate that matters (§7 units, not the segment-level cv.json):"
+echo "  python -m arch_metd.eval.aggregate"
 echo
 echo "pull them back from the laptop with:"
 echo "  rsync -avP <you>@<box>:~/eeg/arch_metd/results/ arch_metd/results/"

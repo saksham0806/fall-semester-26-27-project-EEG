@@ -438,3 +438,83 @@ So §5.3's "lock early stopping until λ ≥ 0.5" covers only the first 11% of t
 prevents shipping a completely un-adapted model; it is not evidence that adaptation had
 time to work. `lambda_at_stop` is logged per fold for exactly this reason and is the first
 thing to read in `cv.json`.
+
+**Phase 5 results — read `aggregate.py`, never `cv.json`.**
+
+```bash
+.venv/bin/python -u -m arch_metd.eval.aggregate    # §7 units + bootstrap CIs
+```
+
+`cv.json` carries **segment-level** AUCs, which §7 and §12 item 7 say are never primary.
+`aggregate.py` reduces out-of-fold predictions to the unit the label actually varies over
+by **logit median** — depression to subject, SAM40 to trial, CogLoad to within-subject,
+EEGMAT to §7.3's paired sign test — and attaches a 1,000-iteration bootstrap CI.
+
+| result | subject-level AUC | 95% CI | |
+|---|---:|---|---|
+| depression / **MODMA** | 0.5647 | [0.416, 0.721] | **CI crosses chance** |
+| depression / **Mumtaz** | 0.9386 | [0.866, 0.992] | above §13's expected 0.70-0.85 |
+| depression / pooled *(secondary)* | 0.8051 | [0.722, 0.882] | **do not quote** |
+
+⚠️ **The pooled 0.8051 is a pooling artifact**, exactly as §7.1 predicted. It sits between
+a corpus at chance and one at 0.94, and describes neither. Report the two separately.
+
+⚠️ **Mumtaz's 0.9386 has a batch confound.** Recording length alone predicts the class
+there at AUC 0.709 (MDD 270 ± 54 segments vs HC 285 ± 48); MODMA's equivalent is 0.514.
+Session lengths that differ by class mean the two groups were acquired under systematically
+different conditions, which is a signature the model can use. §6.2 anticipated the pattern:
+when the two depression corpora disagree this sharply, neither number stands alone.
+
+**Three fixes landed after the first run, so its results are superseded — re-run to use them:**
+
+- **Checkpoint selection is gated on λ ≥ 0.5** (`LAMBDA_FLOOR`), not just early stopping.
+  Measured on the first run, the best validation epoch was 4-8 with λ = 0.20-0.38 in 3 of
+  5 folds, so the shipped checkpoint was un-adapted while `lambda_at_stop` read a
+  reassuring 0.74-0.82. The lock delayed stopping; it did not gate what got selected.
+- **Predictions now carry `subject_id`, `trial_id` and `condition`.** Without them,
+  subject-level aggregation had to reconstruct identity from the fold indices, and that
+  only worked for two of four corpora — see below.
+- **`build.py` writes a fingerprint** (`results/build_info.json`, and `--fingerprint`),
+  stamped into `cv.json` and printed by `run_gpu.sh`. The first run's arrays turned out
+  **not** to be the local ones: SAM40 rows were reordered in 5/5 folds and CogLoad in 2/5,
+  which is invisible in every summary statistic and cost a long forensic detour.
+  `run_gpu.sh` no longer md5s the file — two honest rebuilds legitimately differ at
+  floating-point gate boundaries — it prints the fingerprint instead.
+
+`aggregate.py` still recovers identity for predictions saved before that fix, but only for
+corpora whose label sequence matches the split **exactly**, and it drops any corpus that
+fails in even one fold. That is why the table above has no stress rows: SAM40 and CogLoad
+were excluded, 9,441 of 34,183 segments.
+
+**Phase 5 controls (§8.3) — main plus three, in one session.**
+
+```bash
+.venv/bin/python -u -m arch_metd.train.loop --smoke --all-modes   # ~1 min CPU, mechanics only
+./arch_metd/run_gpu.sh                                            # runs --all-modes
+```
+
+| mode | what it is | reads as |
+|---|---|---|
+| `main` | the model | the result |
+| `lambda0` | λ fixed at 0, adversary off | **the** comparison — without it "adaptation helped" is unfalsifiable |
+| `permuted` | labels shuffled within corpus | must collapse to 0.50 |
+| `randbb` | frozen random backbone, heads trained | separates learned representation from input artifact |
+
+Outputs are tagged per mode (`cv_lambda0.json`, `preds_fold*_lambda0.npz`, …) so nothing
+overwrites the main run — the same separation `DL_Without_Features/` needs for its smoke
+output, and for the same reason.
+
+**Trained weights are now saved** (`model_fold*<tag>.pt`). §8.1's frozen domain probe and
+§8.2's silhouette both freeze a *trained* backbone; the first run kept weights in memory
+only, which left phase 6 unable to start without retraining.
+
+`permute_within_corpus` shuffles labels at the **aggregation unit** — subject for the
+depression corpora, trial for the stress ones — not at the segment. Shuffling segment
+labels inside a subject would leave that subject's mean label almost unchanged, so a
+subject-level metric would barely move and the control would pass while testing nothing.
+It asserts the unit-level label multiset survives; the segment-level balance legitimately
+shifts, because units differ in length by 3-4x (Mumtaz 93-336 segments each).
+
+Verified on the smoke run: `randbb`'s backbone is bit-identical to its initialisation
+while its heads moved, `main`'s backbone moved, `lambda0` reports λ = 0.0 at every stop,
+and predictions carry `subject_id` / `trial_id` / `condition`.

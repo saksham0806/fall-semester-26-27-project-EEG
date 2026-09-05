@@ -8,6 +8,7 @@ array cannot be staged by accident. Re-runnable: the output is overwritten, neve
 merged, and no cache is keyed on a filename.
 """
 import argparse
+import hashlib
 import json
 from collections import Counter
 
@@ -29,6 +30,24 @@ def _loaders():
     """
     from .loaders import cogload, eegmat, modma, mumtaz, sam40
     return {0: modma, 1: sam40, 2: cogload, 3: mumtaz, 4: eegmat}
+
+
+def fingerprint(d):
+    """A cheap, order-sensitive identity for a built array set.
+
+    Two boxes rebuilding from the same corpora do not necessarily produce byte-identical
+    arrays — gate decisions sit on floating-point boundaries, and row order can differ.
+    Results computed against different arrays are not comparable, and the difference is
+    invisible in every summary statistic. Record it so a mismatch is one line, not a
+    forensic exercise.
+    """
+    h = hashlib.sha256()
+    h.update(str(d["X"].shape).encode())
+    for part in (d["X"][:512], d["X"][-512:]):
+        h.update(np.ascontiguousarray(part).tobytes())
+    for name in ("y_dep", "y_str", "y_domain"):
+        h.update(np.ascontiguousarray(d[name]).tobytes())
+    return h.hexdigest()[:16]
 
 
 def three_class(y_dep, y_str):
@@ -155,6 +174,10 @@ def build(k):
         f"# Rejection table (§3.2)\n\nVAR_GATE_K = {k}\n\n{table}")
     base = baselines(d)
     (RESULTS / "baselines.json").write_text(json.dumps(base, indent=2))
+    info = {"fingerprint": fingerprint(d), "n_segments": int(len(d["X"])),
+            "var_gate_k": k, "segments_per_domain": base["segments_per_domain"]}
+    (RESULTS / "build_info.json").write_text(json.dumps(info, indent=2))
+    print(f"\nbuild fingerprint {info['fingerprint']}  ({info['n_segments']} segments)")
 
     print(f"\n{table}")
     print(f"corpus dummy (3-class, knowing only the corpus): {base['corpus_dummy_3class']:.4f}")
@@ -178,8 +201,15 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--calibrate-k", action="store_true",
                    help="sweep the variance gate on MODMA and write nothing")
+    p.add_argument("--fingerprint", action="store_true",
+                   help="identify the built arrays and exit; compare across machines")
     a = p.parse_args()
     if a.calibrate_k:
         calibrate_k()
+    elif a.fingerprint:
+        d = load()
+        print(f"fingerprint {fingerprint(d)} | {len(d['X'])} segments | "
+              + " ".join(f"{c.name}={int((d['y_domain'] == c.domain).sum())}"
+                         for c in CORPORA))
     else:
         build(VAR_GATE_K)
