@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir $(grep -vE '^\s*(#|$)' requirements.txt \
       | grep -vE '^(torch|torchaudio|tensorflow)$' | tr '\n' ' ')
 
 # braindecode hard-imports torchaudio; the base image does not always ship it.
-RUN python -c "import torchaudio" || pip install --no-cache-dir torchaudio
+RUN python -c "import torchaudio" || pip install --no-cache-dir torchaudio==2.10.0
 
 # Fails the build rather than a 3-hour run if the base image lost its CUDA torch.
 RUN python -c "import torch, braindecode; assert torch.version.cuda, 'CPU torch in image'"
