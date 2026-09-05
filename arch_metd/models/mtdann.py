@@ -10,7 +10,7 @@ from torch import nn
 from ..contract import N_DOMAINS
 from .eegnet import EEGNet, Z_DIM
 from .grl import GradientReversal
-from .heads import anchor_weights, domain_loss, head, masked_bce
+from .heads import anchor_weights, domain_loss, head, masked_bce, positive_weight
 
 
 class MTDANN(nn.Module):
@@ -26,12 +26,13 @@ class MTDANN(nn.Module):
         z = self.backbone(x)
         return z, self.dep(z), self.str(z), self.domain(self.grl(z))
 
-    def loss(self, batch, weights, lambd):
+    def loss(self, batch, weights, lambd, pos_weight=None):
         x, y_dep, y_str, y_domain, anchor = batch
         self.grl.lambd = lambd
+        pw = pos_weight or {}
         _, dep, stress, dom = self(x)
-        parts = {"dep": masked_bce(dep, y_dep),
-                 "str": masked_bce(stress, y_str),
+        parts = {"dep": masked_bce(dep, y_dep, pw.get("dep")),
+                 "str": masked_bce(stress, y_str, pw.get("str")),
                  "domain": domain_loss(dom, y_domain, anchor, weights)}
         # lambda scales the adversary in the loss as well as in the reversal, so a
         # lambda = 0 control is genuinely method-off rather than merely un-reversed
@@ -58,6 +59,13 @@ def _selfcheck():
     mass = w * counts
     assert torch.allclose(mass[mass > 0], mass[mass > 0][0]), mass
 
+    # a single-domain anchor set yields no alignment signal, so the adversary is off
+    one = torch.zeros(b, dtype=torch.int8)
+    m.zero_grad()
+    domain_loss(m.domain(m.backbone(x)), one, anchor, anchor_weights(one, anchor)).backward()
+    assert all(p.grad is None or p.grad.abs().sum() == 0 for p in m.domain.parameters()), \
+        "the adversary ran against a single domain"
+
     # a segment that is not an anchor puts zero gradient on the domain head
     m.zero_grad()
     domain_loss(m.domain(m.backbone(x)), y_domain, torch.zeros_like(anchor), w).backward()
@@ -69,6 +77,16 @@ def _selfcheck():
     assert abs(float(masked_bce(logits, torch.tensor([1, 0, -1, -1], dtype=torch.int8)))
                - 0.6931) < 1e-3
     assert float(masked_bce(logits, torch.full((4,), -1, dtype=torch.int8))) == 0.0
+
+    # §6.5 item 2: class weighting must actually reweight, and must ignore the mask
+    y_imb = torch.tensor([1] * 8 + [0] * 2 + [-1] * 6, dtype=torch.int8)
+    pw = positive_weight(y_imb)
+    assert abs(float(pw) - 0.25) < 1e-6, pw          # 2 negatives / 8 positives
+    assert positive_weight(torch.full((6,), -1, dtype=torch.int8)) is None
+    assert positive_weight(torch.ones(6, dtype=torch.int8)) is None, "single-class"
+    # down-weighting the majority positives must lower the loss on all-positive logits
+    lg = torch.zeros(16, 1)
+    assert masked_bce(lg, y_imb, pw) < masked_bce(lg, y_imb), "pos_weight did nothing"
 
     # the GRL flips the sign of the gradient reaching the backbone
     grads = {}

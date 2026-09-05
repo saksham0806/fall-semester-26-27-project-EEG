@@ -14,7 +14,7 @@ import json
 import numpy as np
 
 from ..contract import BY_DOMAIN, ROOT
-from .metrics import auc_ci, paired_sign_test
+from .metrics import auc, auc_ci, paired_sign_test
 
 RESULTS = ROOT / "arch_metd/results"
 
@@ -37,8 +37,15 @@ def by_unit(units, score, y):
     return ids, np.asarray(out_s), np.asarray(out_y)
 
 
-def load_oof(pattern="preds_fold*.npz"):
-    """Out-of-fold predictions, concatenated. Every segment appears exactly once."""
+def load_oof(mode="main"):
+    """Out-of-fold predictions for ONE mode, concatenated. Each segment appears once.
+
+    The pattern is anchored, not `preds_fold*.npz`: that glob also matches
+    `preds_fold0_lambda0.npz` and `_smoke`, which would silently pool a control run and
+    a 3-epoch smoke into the main result and report the average as the model.
+    """
+    tag = "" if mode == "main" else f"_{mode}"
+    pattern = f"preds_fold[0-9]{tag}.npz"
     files = sorted(RESULTS.glob(pattern))
     assert files, f"no {pattern} in {RESULTS} — run the training first"
     parts = [dict(np.load(f)) for f in files]
@@ -139,7 +146,7 @@ def report(d):
             sm = m & (d["subject_id"] == sub)
             _, ss, sy = by_unit(d["trial_id"][sm], d["str"][sm], d["y_str"][sm])
             if len(np.unique(sy)) == 2:
-                within.append(auc_ci(sy, ss, n_boot=1)["auc"])
+                within.append(auc(sy, ss))
         rows["stress / sam40 [within-subject mean] (secondary)"] = {
             "auc": float(np.mean(within)), "n": len(within)}
 
@@ -152,7 +159,7 @@ def report(d):
             sm = m & (d["subject_id"] == sub)
             _, ss, sy = by_unit(d["trial_id"][sm], d["str"][sm], d["y_str"][sm])
             if len(np.unique(sy)) == 2:
-                within.append(auc_ci(sy, ss, n_boot=1)["auc"])
+                within.append(auc(sy, ss))
         rows["stress / cogload [within-subject mean]"] = {
             "auc": float(np.mean(within)), "n": len(within)}
         _, s, y = by_unit(d["trial_id"][m], d["str"][m], d["y_str"][m])
@@ -205,9 +212,10 @@ if __name__ == "__main__":
     _selfcheck()
     if "--selfcheck-only" in sys.argv:
         sys.exit(0)
-    d = load_oof()
+    mode = sys.argv[sys.argv.index("--mode") + 1] if "--mode" in sys.argv else "main"
+    d = load_oof(mode)
     rows = report(d)
-    print(f"\nout-of-fold, {len(d['dep'])} segments\n")
+    print(f"\nmode={mode}, out-of-fold, {len(d['dep'])} segments\n")
     for name, r in rows.items():
         if "p_value" in r:
             print(f"  {name:52s} {r['proportion']:.3f}  ({r['n_higher']}/{r['n']}, "
@@ -218,6 +226,7 @@ if __name__ == "__main__":
                   f"n={r['n']}{flag}")
         else:
             print(f"  {name:52s} {r['auc']:.4f}  n={r['n']}")
-    (RESULTS / "aggregate.json").write_text(json.dumps(rows, indent=2))
-    print(f"\nwrote {RESULTS / 'aggregate.json'}")
+    out = RESULTS / f"aggregate{'' if mode == 'main' else '_' + mode}.json"
+    out.write_text(json.dumps(rows, indent=2))
+    print(f"\nwrote {out}")
     print("segment-level figures in cv.json are NOT primary (§7, §12 item 7)")
