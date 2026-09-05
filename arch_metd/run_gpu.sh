@@ -87,14 +87,23 @@ echo '=== full nested CV: main + the three §8.3 controls ==='
 # result with no method-off comparison is unfalsifiable. Do them in one session rather
 # than discovering later that a second GPU trip is needed.
 python -u -m arch_metd.train.loop --all-modes 2>&1 | tee arch_metd/results/train.log
+
+echo '=== cross-corpus transfer (§6.2) ==='
+# Runs AFTER the CV on purpose. The §6.5 gates are read off the CV output, and a failed
+# stress head makes every transfer number unanswerable — better to see that in the same
+# log than to read a transfer table that means nothing.
+python -u -m arch_metd.train.loop --transfer 2>&1 | tee -a arch_metd/results/train.log
 "
 
 echo
 echo "done. results in arch_metd/results/:"
 ls -la arch_metd/results/
 echo
-echo "the aggregate that matters (§7 units, not the segment-level cv.json):"
-echo "  python -m arch_metd.eval.aggregate"
+echo "then, back on the laptop:"
+echo "  python -m arch_metd.eval.aggregate --mode main   # and lambda0 / randbb / permuted"
+echo "  python -m arch_metd.eval.probes                  # §8.1 probes + the pre-registered gate"
+echo "  python -m arch_metd.eval.controls                # §8.4 cross-head"
+echo "  python -m arch_metd.eval.report                  # assembles arch_metd/REPORT.md"
 echo
 echo "pull them back from the laptop with:"
 echo "  rsync -avP <you>@<box>:~/eeg/arch_metd/results/ arch_metd/results/"

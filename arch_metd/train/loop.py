@@ -19,9 +19,9 @@ from torch.utils.data import DataLoader, TensorDataset, WeightedRandomSampler
 from ..contract import CORPORA, ROOT
 from ..data.build import fingerprint, load
 from ..models.grl import lambda_at
-from ..models.heads import anchor_weights
+from ..models.heads import anchor_weights, positive_weight
 from ..models.mtdann import MTDANN
-from .folds import inner_folds, outer_folds
+from .folds import TRANSFERS, inner_folds, outer_folds, transfer
 
 RESULTS = ROOT / "arch_metd/results"
 BATCH = 64
@@ -124,6 +124,10 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
         # supposed to be fixed.
         model.backbone.requires_grad_(False)
     weights = anchor_weights(d["y_domain"][train_idx], d["anchor"][train_idx])
+    # from the training split only — computing it over all data would leak the test
+    # fold's class balance into the loss
+    pos_weight = {"dep": positive_weight(d["y_dep"][train_idx]),
+                  "str": positive_weight(d["y_str"][train_idx])}
     opt = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
     sched = CosineAnnealingWarmRestarts(opt, T_0=max(epochs // 4, 1))
     train_loader, val_loader = _loader(d, train_idx, True), _loader(d, val_idx, False)
@@ -137,7 +141,7 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
         lambd = lambda_fn(epoch / max(epochs - 1, 1))
         for batch in train_loader:
             batch = [t.to(device) for t in batch]
-            loss, _ = model.loss(batch, weights, lambd)
+            loss, _ = model.loss(batch, weights, lambd, pos_weight)
             opt.zero_grad()
             loss.backward()
             opt.step()
@@ -169,6 +173,8 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
         best["below_floor"] = True
     model.load_state_dict(best["state"])
     return model, {"best_epoch": best["epoch"], "lambda_at_stop": round(lambd, 4),
+                   "pos_weight": {k: None if v is None else round(float(v), 4)
+                                  for k, v in pos_weight.items()},
                    "lambda_at_best": round(best["lambda"], 4),
                    "selected_below_lambda_floor": bool(best.get("below_floor", False)),
                    "stopped_epoch": epoch, "inner_auc": best["parts"]}
@@ -182,6 +188,66 @@ MODES = {
     "permuted": {"permute": True},
     "randbb": {"random_backbone": True},
 }
+
+
+def run_transfer(name, mode, d, device, epochs, patience):
+    """One cross-corpus run (§6.2, §7.5). Train and test corpora are disjoint.
+
+    This is what the architecture actually claims. Within-corpus CV measures decodability
+    only: corpus identity is present in the test fold too, so a model can ride the device
+    signature and no accuracy column will say so. Only transfer tests whether the
+    representation survives a hardware change.
+    """
+    train_idx, test_idx = transfer(d, name)
+    cfg = dict(MODES[mode])
+    cfg.pop("permute", None)
+    inner_train, inner_val = next(inner_folds(d, train_idx))
+    t0 = time.time()
+    model, info = train_fold(d, inner_train, inner_val, device, epochs=epochs,
+                             patience=patience, **cfg)
+    p = predict(model, _loader(d, test_idx, False), device)
+    pv = predict(model, _loader(d, inner_val, False), device)
+    thresholds = {}
+    for h in ("dep", "str"):
+        m = pv[f"y_{h}"] != -1
+        if m.sum() and len(np.unique(pv[f"y_{h}"][m])) == 2:
+            thresholds[h] = youden(pv[f"y_{h}"][m], pv[h][m])
+    n_train_domains = len(np.unique(d["y_domain"][train_idx]))
+    info |= {"transfer": name, "mode": mode, "thresholds": thresholds,
+             "train_domains": np.unique(d["y_domain"][train_idx]).tolist(),
+             "test_domains": np.unique(d["y_domain"][test_idx]).tolist(),
+             "n_train": len(train_idx), "n_test": len(test_idx),
+             # With one training corpus there is nothing to align against, so the
+             # adversary is disabled at source (heads.domain_loss) and main is identical
+             # to lambda0 by construction. Three of the four §6.2 transfers are in that
+             # position, which means only the primary stress direction can test domain
+             # adaptation at all.
+             "adversary_operative": n_train_domains > 1,
+             "elapsed_sec": round(time.time() - t0, 1)}
+    for k in ("subject_id", "trial_id", "condition"):
+        p[k] = d[k][test_idx]
+    tag = f"transfer_{name}" + ("" if mode == "main" else f"_{mode}")
+    np.savez(RESULTS / f"preds_{tag}.npz", **p)
+    torch.save(model.state_dict(), RESULTS / f"model_{tag}.pt")
+    print(f"  {name:28s} {mode:8s} lambda@stop {info['lambda_at_stop']:.3f} "
+          f"| adversary {'on' if info['adversary_operative'] else 'OFF (1 train corpus, nothing to align)'} "
+          f"| {info['elapsed_sec']}s")
+    return info
+
+
+def run_all_transfers(smoke=False):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    d = load()
+    epochs = 3 if smoke else EPOCHS
+    out = []
+    for name in TRANSFERS:
+        for mode in ("main", "lambda0"):  # every transfer with its own method-off control
+            out.append(run_transfer(name, mode, d, device, epochs,
+                                    1 if smoke else PATIENCE))
+    path = RESULTS / f"transfer{'_smoke' if smoke else ''}.json"
+    path.write_text(json.dumps({"device": device, "epochs": epochs,
+                                "fingerprint": fingerprint(d), "runs": out}, indent=2))
+    print(f"wrote {path}")
 
 
 def run(smoke=False, mode="main"):
@@ -241,6 +307,8 @@ if __name__ == "__main__":
                     help="main | lambda0 (method-off) | permuted | randbb (§8.3 controls)")
     ap.add_argument("--all-modes", action="store_true",
                     help="main plus all three controls, in one session")
+    ap.add_argument("--transfer", action="store_true",
+                    help="§6.2 cross-corpus runs instead of CV, each with its lambda=0 control")
     a = ap.parse_args()
     if not a.smoke:
         # §8.6: a prior run returned MODMA subject-level AUC 0.3434 with one fold at
@@ -248,6 +316,10 @@ if __name__ == "__main__":
         # join before spending a GPU queue slot on it.
         from ..data.verify import check_labels
         check_labels(load())
-    for mode in (list(MODES) if a.all_modes else [a.mode]):
-        print(f"\n===== mode: {mode} =====")
-        run(smoke=a.smoke, mode=mode)
+    if a.transfer:
+        print("\n===== cross-corpus transfer (§6.2, §7.5) =====")
+        run_all_transfers(smoke=a.smoke)
+    else:
+        for mode in (list(MODES) if a.all_modes else [a.mode]):
+            print(f"\n===== mode: {mode} =====")
+            run(smoke=a.smoke, mode=mode)

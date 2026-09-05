@@ -573,3 +573,83 @@ cross-head argmax would be catastrophic. That is why §9 forbids one.
 
 The depression head behaves correctly by contrast: out-of-domain segments land near its
 negative distribution, not above its positives.
+
+## Phase 6.5 — fixes that phase 6 forced
+
+```bash
+.venv/bin/python -u -m arch_metd.train.folds       # asserts row-order invariance
+.venv/bin/python -u -m arch_metd.models.mtdann     # asserts class weighting works
+./arch_metd/run_gpu.sh                             # re-run, then re-check probes
+```
+
+**1. The split is now row-order invariant.** `folds.py` computes each corpus's split on a
+canonically ordered view (sorted by subject id, ties by position) and maps back. Before
+this, plain `GroupKFold` broke size ties in encounter order and every SAM40 subject has
+exactly 12 trials, so two builds of the same corpora differing only in row order put
+**4-10 SAM40/CogLoad subjects in different folds**. Both splits were valid; they were not
+the same split, so no stress number was reproducible. `folds.py` now asserts that
+shuffling the input rows leaves all 169 subject-to-fold assignments identical, over three
+permutations.
+
+**2. The heads are class-weighted.** Measured on the pre-fix run:
+
+| | stress | depression |
+|---|---:|---:|
+| training positive rate | **0.776** | 0.492 |
+| final-layer bias | **+0.249** | +0.025 |
+| logit, positives / negatives | +1.375 / **+1.174** | +0.892 / −1.247 |
+| separation | **+0.201** | +2.139 |
+
+Both stress logit distributions sat **above zero** — the head predicted "stressed" by
+default and ranked weakly on top of that offset, which is why it emitted ~0.81 on MODMA, a
+corpus with no stress in it. Corpus-balanced sampling equalises **corpora, not classes**,
+so it never addressed this. `masked_bce` now takes `pos_weight`, computed from the
+**training split only** (0.287 stress, 0.929 depression) — computing it over all data
+would leak the test fold's class balance into the loss.
+
+⚠️ **EEGMAT is 25.3% positive against training's 77.6%.** A head biased to the training
+prior cannot transfer to it, so this fix is a precondition for P7, not a refinement.
+
+**3. Mumtaz is confounded with its acquisition setup.** Full detail in
+`results/mumtaz_audit.md`. The EDF channel count predicts diagnosis at **0.8889**
+(baseline 0.5238): 23 signals is 24 H / 1 MDD, 21 signals is 6 H / 32 MDD. Montage alone
+scores **0.8685** against the model's 0.9418. Within a single montage the model still
+reaches 0.9107, so it is not reading setup alone — but neither subgroup is powered to
+settle the residual (4 HC in one, 3 MDD in the other), and **no adequately sized subgroup
+holds both classes on one montage**. Quote Mumtaz's AUC only alongside that table.
+
+**4. §8.2 is replaced.** The silhouette gate could not adjudicate — all three modes within
+±0.004 of zero. The frozen probe, which separated them cleanly, is now the gate:
+`anchor_probe(main) < anchor_probe(lambda0) - 0.05`, recorded in
+`results/preregistration.md` **before** the fixed pipeline was re-run. Absolute probe
+values are reported alongside the verdict, so a passing margin on a still-corpus-separable
+representation cannot be quoted as invariance.
+
+## Phase 7 — cross-corpus transfer and the report
+
+```bash
+.venv/bin/python -u -m arch_metd.train.loop --smoke --transfer   # ~1.5 min CPU, mechanics
+./arch_metd/run_gpu.sh                                           # CV + controls, then transfer
+.venv/bin/python -m arch_metd.eval.report                        # assembles arch_metd/REPORT.md
+```
+
+Within-corpus CV measures **decodability only** — corpus identity is present in the test
+fold too, so a model can ride the device signature and no accuracy column will say so.
+The four §6.2 runs are the only device-disjoint measurements in the project.
+
+⚠️ **Three of the four transfer directions train on a single corpus**, so the adversary
+has no second domain to align against. This is not a detail: with one domain the
+cross-entropy over five domain logits still has a gradient, the GRL reverses it, and the
+backbone gets pushed to make a trivial one-class prediction *harder* — measured, the
+single-corpus depression transfer trained to different weights at λ=1 than at λ=0 with
+nothing to align. `domain_loss` now returns zero when the anchor set holds fewer than two
+domains, so those runs are λ-independent by construction (verified: bit-identical weights,
+max |Δp| = 0.000000). **Only `stress_sam40cog_to_eegmat` can test domain adaptation.**
+
+`run_gpu.sh` runs transfer **after** the CV deliberately: the §6.5 gates are read off the
+CV output, and a stress head still pinned near 0.8 would make every transfer number
+unanswerable — better to see that in the same log.
+
+`eval/report.py` assembles `arch_metd/REPORT.md` from `results/*.json`. Sections whose
+inputs are missing are printed as *not run* rather than omitted, so the report states what
+has not happened as plainly as what has.

@@ -263,6 +263,83 @@ bootstrap CI, paired sign test).
 
 ---
 
+## Phase 6.5 — Fix what phase 6 exposed ⛔ BEFORE ANY TRANSFER NUMBER
+
+Not in `metd_plan.md`. Added after phase 6, because its diagnostics invalidated three of
+the preconditions P7 assumes. P7 is the only measurement that tests what this architecture
+actually claims, and it is worth doing once against a sound pipeline rather than three
+times against a moving one. Four items, in order — each depends on the one before.
+
+### 1. Make the split reproducible
+
+**The defect.** `folds.py` uses plain `GroupKFold` for SAM40 and CogLoad. Every SAM40
+subject has exactly 12 trials, so group sizes tie and `GroupKFold` breaks ties by
+encounter order — which changes with array row order. Measured: the workstation split
+differs from the local one by **4-10 subjects per fold**, in SAM40 and CogLoad only.
+MODMA and Mumtaz are unaffected (unequal sizes, seeded `StratifiedGroupKFold`).
+
+**Consequence.** Both splits are valid — subject-disjoint, no leakage — but they are
+different, so no stress number is reproducible or comparable across runs. Nothing
+downstream means anything until this is deterministic.
+
+**Fix.** Canonicalise subject order before splitting, so fold assignment depends only on
+*which* subjects exist, not on how rows happen to be laid out.
+
+**Gate.** Shuffling the rows of the input arrays leaves every fold membership identical.
+Assert it, in `folds.py`'s self-check, over several permutations.
+
+### 2. Diagnose the stress head
+
+**The defect.** §8.4 measured in-domain separation of **+0.026** with out-of-domain MODMA
+at **0.812 — above its own in-domain positives**. The head is near-constant and says
+"stressed" to a corpus containing zero stress segments.
+
+**Where to look, in order.** Raw logits before the sigmoid, then the class balance the
+masked BCE actually sees. Stress is ~77% positive pooled and 25/75 within SAM40, and
+corpus-balanced sampling rebalances *corpora*, not *classes* — a head that predicts the
+positive class everywhere gets most of the loss right, which is exactly what saturation
+near 0.8 looks like. Then re-run.
+
+**Gate.** In-domain separation > 0.10, and the out-of-domain median below the in-domain
+positive median. A collapsed head makes the transfer test unanswerable: EEGMAT would score
+whatever a constant predictor scores, and that number would say nothing about transfer.
+
+### 3. Audit Mumtaz's batch structure
+
+**The finding to explain.** Mumtaz sits at subject-level AUC **0.9418**, above §13's
+expected 0.70-0.85 — and **recording length alone predicts its class at AUC 0.709**
+(MODMA's equivalent: 0.514). `randbb` reaches 0.9235 there with a never-trained backbone,
+and the permutation control kills it to 0.4601. That combination reads as a real but
+possibly non-neural signal.
+
+**What to check.** EDF headers carry recording date, start time, and equipment fields.
+Test whether acquisition metadata alone separates H from MDD. If it does, the two groups
+were recorded in different sessions or batches and the model may be reading the batch.
+
+**Gate.** A written statement of whether H and MDD are separable by acquisition metadata
+alone, with the number. One afternoon of work, and it determines how every depression
+figure in this project gets read — including whether 0.9418 belongs in a paper at all.
+
+### 4. Pre-register a replacement for §8.2
+
+**Why.** The silhouette gate carried no signal: all three modes landed within ±0.004 of
+zero, so the pre-registered relative test could not have passed and §8.2's absolute 0.3
+would have passed trivially. Neither form measured anything.
+
+**What replaces it.** The frozen probe already *is* the informative measure — it separated
+the three modes cleanly (main 0.3970, λ=0 0.4761, random 0.4649, against 0.250 chance).
+Make it the gate. Register the criterion, in writing, before re-measuring on the fixed
+pipeline; the existing numbers do not count as the pre-registration, because they are
+already known.
+
+**Gate.** A dated criterion in `results/preregistration.md`, recorded before the re-run.
+
+**Your turn.**
+- *Before:* nothing for items 1-3. Item 4 needs your criterion, and it must be written down before the fixed pipeline is measured — the same rule that governed §8.2, for the same reason.
+- *After:* read the Mumtaz audit. If acquisition metadata separates the classes there, that is a finding about the corpus rather than about the model, and how it is reported is a judgement call I should not make alone. It plausibly changes the paper from "depression transfer is weak" to "one of our two depression corpora is confounded".
+
+---
+
 ## Phase 7 — Transfer, aggregation, report
 
 Spec §7, §7.5, §13. Only now does a headline number get written down.
@@ -318,12 +395,18 @@ accuracy appears anywhere, the majority baseline sits next to it.
 
 ```
 P0 ──> P1 ──┐
-       P2 ──┴──> P3 ⛔ ──> P4 ──> P5 ⛔ ──> P6 ──> P7 ──> P8
+       P2 ──┴──> P3 ⛔ ──> P4 ──> P5 ⛔ ──> P6 ──> P6.5 ⛔ ──> P7 ──> P8
 ```
 
 P1 and P2 are independent and can be built in either order. Everything downstream of
 P3 depends on the arrays P3 writes, so a change to the filter chain, the gate, or `K`
 invalidates every result after it — rebuild, do not patch.
+
+P6.5 is not in the specification. It exists because phase 6 measured three things that
+make a P7 result uninterpretable: a split that changes between runs, a stress head that
+outputs one value, and a depression corpus whose class may be confounded with its
+acquisition batch. Its four items are ordered by dependency — a re-run for item 2 is
+wasted unless item 1 has made the split stable.
 
 ## What this plan drops from `metd_plan.md`
 

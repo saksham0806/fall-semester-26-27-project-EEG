@@ -28,24 +28,40 @@ TRANSFERS = {
 
 
 def _corpus_fold_ids(d, domain, n_splits, seed):
-    """Fold index per segment of one corpus."""
+    """Fold index per segment of one corpus.
+
+    The split is computed on a CANONICALLY ORDERED view — sorted by subject id, ties by
+    original position — and mapped back. Without that, fold assignment depends on the row
+    order of the arrays: `GroupKFold` balances by group size and breaks ties in encounter
+    order, and every SAM40 subject has exactly 12 trials, so its groups tie everywhere.
+    Measured before this fix: two builds of the same corpora, differing only in row order,
+    put 4-10 SAM40/CogLoad subjects in different folds. Both splits were valid and
+    subject-disjoint; they were simply not the same split, so no stress number was
+    reproducible across runs.
+    """
     sel = np.flatnonzero(d["y_domain"] == domain)
     groups = d["subject_id"][sel]
     assert len(set(groups)) >= n_splits, f"{BY_DOMAIN[domain].name}: too few subjects"
-    out = np.empty(len(sel), int)
+
+    order = np.lexsort((sel, groups))
+    sel_c, groups_c = sel[order], groups[order]
+    folds_c = np.empty(len(sel), int)
 
     if BY_DOMAIN[domain].task == "depression":
         # the label is a per-subject trait, so plain k-fold on 53 subjects can hand you
         # a fold with almost no MDD — stratify (§6.1)
         splitter = StratifiedGroupKFold(n_splits, shuffle=True, random_state=seed)
-        it = splitter.split(sel, d["y_dep"][sel], groups)
+        it = splitter.split(sel_c, d["y_dep"][sel_c], groups_c)
     else:
         # every stress subject holds both classes, so a subject-level label does not
         # exist to stratify on
-        it = GroupKFold(n_splits).split(sel, None, groups)
+        it = GroupKFold(n_splits).split(sel_c, None, groups_c)
 
     for i, (_, test) in enumerate(it):
-        out[test] = i
+        folds_c[test] = i
+
+    out = np.empty(len(sel), int)
+    out[order] = folds_c
     return sel, out
 
 
@@ -104,10 +120,30 @@ def _no_overlap(d, train, test, what):
     assert not (set(train.tolist()) & set(test.tolist())), f"{what}: segment in both"
 
 
+def subject_folds(d, **kw):
+    """{subject_id: outer fold index} — the split, independent of row order."""
+    out = {}
+    for i, (_, test) in enumerate(outer_folds(d, **kw)):
+        for s in np.unique(d["subject_id"][test]):
+            out[s] = i
+    return out
+
+
 if __name__ == "__main__":
     from ..data.build import load
 
     d = load()
+
+    # §6.5 item 1: the split must depend only on WHICH subjects exist, never on how the
+    # rows happen to be laid out. Three permutations, because one could get lucky.
+    base = subject_folds(d)
+    for seed in (1, 2, 3):
+        order = np.random.default_rng(seed).permutation(len(d["y_domain"]))
+        shuffled = {k: v[order] for k, v in d.items()}
+        moved = {s: (base[s], f) for s, f in subject_folds(shuffled).items() if base[s] != f}
+        assert not moved, (f"row order changed the split for {len(moved)} subjects, "
+                           f"e.g. {list(moved)[:5]}")
+    print(f"  split is row-order invariant over 3 permutations ({len(base)} subjects)")
     assert set(np.unique(d["y_domain"])) <= {0, 1, 2, 3, 4}, "domain 5 is reserved"
 
     for i, (train, test) in enumerate(outer_folds(d)):

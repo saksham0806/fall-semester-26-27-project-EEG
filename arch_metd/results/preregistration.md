@@ -52,3 +52,49 @@ rather than compactly clustered, which is why §8.2's absolute 0.3 threshold wou
 passed trivially in the same breath. That is a property of the metric here, not evidence
 that adaptation worked. The criterion stands as recorded and the gate is failed; the
 probes below are what carry the actual finding.
+
+---
+
+# Pre-registration 2 — replacing §8.2 (§6.5 item 4)
+
+Recorded **2026-09-06**, before the fixed pipeline (canonical split + class-weighted
+heads) has been re-run. The numbers quoted below come from the superseded run and are
+stated only to show the criterion is achievable and discriminating; they are **not** the
+measurement this gate applies to.
+
+## Why §8.2 is replaced rather than repeated
+
+The silhouette gate could not adjudicate anything. All three modes landed within ±0.004
+of zero, so the pre-registered relative test could not pass and §8.2's absolute 0.3 would
+have passed trivially. Corpus structure in this representation is diffuse rather than
+compactly clustered, which the silhouette is the wrong instrument to see. The frozen
+probe separated the same three modes cleanly.
+
+## Criterion
+
+The shared backbone is retained only if, on the re-run:
+
+    anchor_probe(main)  <  anchor_probe(lambda0) - 0.05
+
+Both measured on the same folds, same architecture, backbone frozen, with an independent
+logistic regression — never the adversary's own head (§12 item 9).
+
+Superseded-run values, for calibration only: main 0.3970, λ=0 0.4761, margin 0.079,
+balanced chance 0.250.
+
+## What this criterion does and does not claim
+
+It tests whether adversarial training removed domain information **relative to its own
+method-off control**. It deliberately does not require the probe to reach the 0.250
+chance floor: partial removal is a real effect and the protocol-gated inference in §0
+stands regardless. A separate honest reporting obligation remains — the absolute anchor
+and full-set probe values are reported alongside the verdict, so a passing margin on a
+still-corpus-separable representation cannot be quoted as invariance.
+
+## Consequence if it fails
+
+Fall back to independent single-task backbones, per §8.2's original consequence.
+
+## Reported regardless of verdict
+
+Anchor probe and full-set probe at λ=1, λ=0 and random-backbone, with the margin.
