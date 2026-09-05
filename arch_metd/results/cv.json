@@ -25,7 +25,7 @@
         "str": 0.7862516045570374
       },
       "domain_acc": 0.14095296460854911,
-      "elapsed_sec": 38.4
+      "elapsed_sec": 38.1
     },
     {
       "best_epoch": 39,
@@ -47,7 +47,7 @@
         "str": 0.7791597247123718
       },
       "domain_acc": 0.18484179543782192,
-      "elapsed_sec": 50.2
+      "elapsed_sec": 50.3
     },
     {
       "best_epoch": 16,
@@ -69,7 +69,7 @@
         "str": 0.82646644115448
       },
       "domain_acc": 0.26025603724178065,
-      "elapsed_sec": 29.9
+      "elapsed_sec": 29.2
     },
     {
       "best_epoch": 20,
@@ -91,7 +91,7 @@
         "str": 0.8130684494972229
       },
       "domain_acc": 0.23113547828596162,
-      "elapsed_sec": 32.7
+      "elapsed_sec": 32.2
     },
     {
       "best_epoch": 12,
@@ -113,7 +113,7 @@
         "str": 0.8184729814529419
       },
       "domain_acc": 0.23171768707482993,
-      "elapsed_sec": 25.3
+      "elapsed_sec": 24.8
     }
   ]
 }
