@@ -1,0 +1,111 @@
+{
+  "device": "cuda",
+  "epochs": 100,
+  "folds": [
+    {
+      "best_epoch": 25,
+      "lambda_at_stop": 0.9654,
+      "lambda_at_best": 0.8518,
+      "stopped_epoch": 40,
+      "inner_auc": {
+        "dep": 0.8162304836719779,
+        "str": 0.6034650101172627
+      },
+      "fold": 0,
+      "test_auc": {
+        "dep": 0.8267773467148999,
+        "str": 0.49827284745618156
+      },
+      "thresholds": {
+        "dep": 0.6429209113121033,
+        "str": 0.7862516045570374
+      },
+      "domain_acc": 0.14095296460854911,
+      "elapsed_sec": 39.5
+    },
+    {
+      "best_epoch": 39,
+      "lambda_at_stop": 0.9915,
+      "lambda_at_best": 0.9618,
+      "stopped_epoch": 54,
+      "inner_auc": {
+        "dep": 0.851944552840241,
+        "str": 0.6484369292994536
+      },
+      "fold": 1,
+      "test_auc": {
+        "dep": 0.7919004194674082,
+        "str": 0.6416172993003242
+      },
+      "thresholds": {
+        "dep": 0.42934003472328186,
+        "str": 0.7791597247123718
+      },
+      "domain_acc": 0.18484179543782192,
+      "elapsed_sec": 49.0
+    },
+    {
+      "best_epoch": 7,
+      "lambda_at_stop": 0.8045,
+      "lambda_at_best": 0.3395,
+      "stopped_epoch": 22,
+      "inner_auc": {
+        "dep": 0.8191442496786525,
+        "str": 0.6057701549806418
+      },
+      "fold": 2,
+      "test_auc": {
+        "dep": 0.7596769616279697,
+        "str": 0.5920574125657692
+      },
+      "thresholds": {
+        "dep": 0.37087300419807434,
+        "str": 0.7603884339332581
+      },
+      "domain_acc": 0.34012219959266804,
+      "elapsed_sec": 20.7
+    },
+    {
+      "best_epoch": 8,
+      "lambda_at_stop": 0.8216,
+      "lambda_at_best": 0.3834,
+      "stopped_epoch": 23,
+      "inner_auc": {
+        "dep": 0.8330218389558677,
+        "str": 0.5776714649587693
+      },
+      "fold": 3,
+      "test_auc": {
+        "dep": 0.8489525539606974,
+        "str": 0.5755157828777316
+      },
+      "thresholds": {
+        "dep": 0.5950965881347656,
+        "str": 0.7528648376464844
+      },
+      "domain_acc": 0.3876785456644063,
+      "elapsed_sec": 21.4
+    },
+    {
+      "best_epoch": 4,
+      "lambda_at_stop": 0.7441,
+      "lambda_at_best": 0.1993,
+      "stopped_epoch": 19,
+      "inner_auc": {
+        "dep": 0.7680956354589382,
+        "str": 0.601406398382142
+      },
+      "fold": 4,
+      "test_auc": {
+        "dep": 0.8070010121341356,
+        "str": 0.5530503589137594
+      },
+      "thresholds": {
+        "dep": 0.5038962960243225,
+        "str": 0.781658411026001
+      },
+      "domain_acc": 0.4135487528344671,
+      "elapsed_sec": 18.8
+    }
+  ]
+}

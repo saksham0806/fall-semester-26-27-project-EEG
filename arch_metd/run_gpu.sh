@@ -19,7 +19,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 IMAGE=eeg-project:torch
 DATA=datasets/metd/metd.npz
-DATA_MD5=6ea0bad272625fd8370fb3aa4980aa08
+DATA_MD5=896709049685aeb349efc456edce00d4
 MODE=${1:-full}
 
 fail() { echo "ERROR: $*" >&2; exit 1; }
