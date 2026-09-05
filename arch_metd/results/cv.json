@@ -1,11 +1,15 @@
 {
   "device": "cuda",
   "epochs": 100,
+  "mode": "main",
+  "fingerprint": "3d017f08c581c5fd",
+  "n_segments": 38449,
   "folds": [
     {
       "best_epoch": 25,
       "lambda_at_stop": 0.9654,
       "lambda_at_best": 0.8518,
+      "selected_below_lambda_floor": false,
       "stopped_epoch": 40,
       "inner_auc": {
         "dep": 0.8162304836719779,
@@ -21,12 +25,13 @@
         "str": 0.7862516045570374
       },
       "domain_acc": 0.14095296460854911,
-      "elapsed_sec": 39.5
+      "elapsed_sec": 38.4
     },
     {
       "best_epoch": 39,
       "lambda_at_stop": 0.9915,
       "lambda_at_best": 0.9618,
+      "selected_below_lambda_floor": false,
       "stopped_epoch": 54,
       "inner_auc": {
         "dep": 0.851944552840241,
@@ -42,70 +47,73 @@
         "str": 0.7791597247123718
       },
       "domain_acc": 0.18484179543782192,
-      "elapsed_sec": 49.0
+      "elapsed_sec": 50.2
     },
     {
-      "best_epoch": 7,
-      "lambda_at_stop": 0.8045,
-      "lambda_at_best": 0.3395,
-      "stopped_epoch": 22,
+      "best_epoch": 16,
+      "lambda_at_stop": 0.9163,
+      "lambda_at_best": 0.6685,
+      "selected_below_lambda_floor": false,
+      "stopped_epoch": 31,
       "inner_auc": {
-        "dep": 0.8191442496786525,
-        "str": 0.6057701549806418
+        "dep": 0.8256221002039662,
+        "str": 0.5923905312248892
       },
       "fold": 2,
       "test_auc": {
-        "dep": 0.7596769616279697,
-        "str": 0.5920574125657692
+        "dep": 0.746271702246387,
+        "str": 0.5606415017974906
       },
       "thresholds": {
-        "dep": 0.37087300419807434,
-        "str": 0.7603884339332581
+        "dep": 0.389791876077652,
+        "str": 0.82646644115448
       },
-      "domain_acc": 0.34012219959266804,
-      "elapsed_sec": 20.7
+      "domain_acc": 0.26025603724178065,
+      "elapsed_sec": 29.9
     },
     {
-      "best_epoch": 8,
-      "lambda_at_stop": 0.8216,
-      "lambda_at_best": 0.3834,
-      "stopped_epoch": 23,
+      "best_epoch": 20,
+      "lambda_at_stop": 0.9434,
+      "lambda_at_best": 0.7658,
+      "selected_below_lambda_floor": false,
+      "stopped_epoch": 35,
       "inner_auc": {
-        "dep": 0.8330218389558677,
-        "str": 0.5776714649587693
+        "dep": 0.8251389653785137,
+        "str": 0.5701503068554968
       },
       "fold": 3,
       "test_auc": {
-        "dep": 0.8489525539606974,
-        "str": 0.5755157828777316
+        "dep": 0.8234615256776727,
+        "str": 0.5938294039320122
       },
       "thresholds": {
-        "dep": 0.5950965881347656,
-        "str": 0.7528648376464844
+        "dep": 0.5825479030609131,
+        "str": 0.8130684494972229
       },
-      "domain_acc": 0.3876785456644063,
-      "elapsed_sec": 21.4
+      "domain_acc": 0.23113547828596162,
+      "elapsed_sec": 32.7
     },
     {
-      "best_epoch": 4,
-      "lambda_at_stop": 0.7441,
-      "lambda_at_best": 0.1993,
-      "stopped_epoch": 19,
+      "best_epoch": 12,
+      "lambda_at_stop": 0.8772,
+      "lambda_at_best": 0.5413,
+      "selected_below_lambda_floor": false,
+      "stopped_epoch": 27,
       "inner_auc": {
-        "dep": 0.7680956354589382,
-        "str": 0.601406398382142
+        "dep": 0.7833597570276348,
+        "str": 0.5729420177856723
       },
       "fold": 4,
       "test_auc": {
-        "dep": 0.8070010121341356,
-        "str": 0.5530503589137594
+        "dep": 0.830296025078703,
+        "str": 0.56699233860306
       },
       "thresholds": {
-        "dep": 0.5038962960243225,
-        "str": 0.781658411026001
+        "dep": 0.7497441172599792,
+        "str": 0.8184729814529419
       },
-      "domain_acc": 0.4135487528344671,
-      "elapsed_sec": 18.8
+      "domain_acc": 0.23171768707482993,
+      "elapsed_sec": 25.3
     }
   ]
 }
