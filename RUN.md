@@ -518,3 +518,58 @@ shifts, because units differ in length by 3-4x (Mumtaz 93-336 segments each).
 Verified on the smoke run: `randbb`'s backbone is bit-identical to its initialisation
 while its heads moved, `main`'s backbone moved, `lambda0` reports λ = 0.0 at every stop,
 and predictions carry `subject_id` / `trial_id` / `condition`.
+
+## Phase 6 — diagnostics (§8)
+
+```bash
+.venv/bin/python -u -m arch_metd.eval.probes      # ~12 min CPU, frozen probes + silhouette
+.venv/bin/python -u -m arch_metd.eval.controls    # seconds, cross-head extrapolation
+```
+
+**§8.1 frozen domain probes.** The backbone is frozen and an **independent** logistic
+regression is fitted on `z`, subject-disjoint. The adversary's own head accuracy is not a
+probe (§12 item 9) — it is one side of a min-max game being actively suppressed.
+
+| mode | anchor probe (chance 0.250) | full-set probe (majority 0.4943) | silhouette |
+|---|---:|---:|---:|
+| main (λ=1) | **0.3970** | **0.5626** | −0.0028 |
+| lambda0 (λ=0) | 0.4761 | 0.6053 | +0.0025 |
+| randbb (random) | 0.4649 | 0.5997 | +0.0033 |
+
+Read together, three things follow:
+
+- **The adversary does something real**: −0.079 on the anchor probe and −0.043 on the
+  full set against its own λ=0 control. That is the method working in the direction it
+  was designed to work.
+- **It does not reach invariance.** 0.3970 against a 0.250 balanced chance means corpus
+  identity stays substantially recoverable *from exactly the embeddings where invariance
+  was enforced*. The full-set probe stays above the majority-domain baseline too.
+- **Task training alone adds no domain separation**: λ=0 (0.4761) and a never-trained
+  random backbone (0.4649) are within noise of each other. The domain signal is inherent
+  in the input, not manufactured by fitting the task.
+
+**§8.2 manifold gate: FAILED** against the criterion pre-registered in
+`results/preregistration.md` before measurement. The caveat is recorded there rather than
+used to revise the criterion: all three silhouettes sit within ±0.004 of zero, so the
+metric carries no signal on this data in any condition. Corpus structure here is diffuse,
+not compactly clustered — §8.2's absolute 0.3 would have passed trivially at the same
+time. The probes, not the silhouette, are what measure the confound.
+
+**§8.4 cross-head extrapolation**, compared against in-domain positives from the same
+head — never against zero, since a head that outputs one value for everything would
+otherwise look like a head that fails to extrapolate.
+
+| head | in-domain pos | in-domain neg | separation | out-of-domain |
+|---|---:|---:|---:|---|
+| stress | 0.808 | 0.782 | **+0.026** | 0.812 — **above** its own positives |
+| depression | 0.755 | 0.263 | +0.492 | 0.364 — near its negatives |
+
+⚠️ **The stress head is near-constant and fires on MODMA at 0.812**, which contains zero
+stress segments. This reproduces the cross-device failure already documented in
+`CLAUDE.md` (the legacy model labelled 90% of MODMA "stressed" at confidence 0.839). §0's
+protocol gate is what contains it — MODMA is `resting`, so the stress head is never
+consulted there — but the head has no calibrated meaning off its training corpora, and a
+cross-head argmax would be catastrophic. That is why §9 forbids one.
+
+The depression head behaves correctly by contrast: out-of-domain segments land near its
+negative distribution, not above its positives.

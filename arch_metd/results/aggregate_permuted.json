@@ -1,0 +1,50 @@
+{
+  "depression / modma [subject]": {
+    "auc": 0.6249999999999999,
+    "ci_lo": 0.46424999999999994,
+    "ci_hi": 0.7728733211233212,
+    "n": 53,
+    "n_pos": 24,
+    "crosses_chance": true
+  },
+  "depression / mumtaz [subject]": {
+    "auc": 0.46012931034482757,
+    "ci_lo": 0.3169888860716701,
+    "ci_hi": 0.6110429495073891,
+    "n": 61,
+    "n_pos": 32,
+    "crosses_chance": true
+  },
+  "depression / pooled [subject] (secondary)": {
+    "auc": 0.5350985221674878,
+    "ci_lo": 0.4266562009419152,
+    "ci_hi": 0.6362990658705702,
+    "n": 114,
+    "n_pos": 56,
+    "crosses_chance": true
+  },
+  "stress / sam40 [trial]": {
+    "auc": 0.4503009259259259,
+    "ci_lo": 0.39120519179894186,
+    "ci_hi": 0.5090929145417293,
+    "n": 480,
+    "n_pos": 360,
+    "crosses_chance": true
+  },
+  "stress / sam40 [within-subject mean] (secondary)": {
+    "auc": 0.4688309314954052,
+    "n": 38
+  },
+  "stress / cogload [within-subject mean]": {
+    "auc": 0.5734848484848485,
+    "n": 11
+  },
+  "stress / cogload [recording] (secondary, ~15 negatives)": {
+    "auc": 0.49261083743842365,
+    "ci_lo": 0.3340476190476191,
+    "ci_hi": 0.6565995393775981,
+    "n": 101,
+    "n_pos": 87,
+    "crosses_chance": true
+  }
+}
