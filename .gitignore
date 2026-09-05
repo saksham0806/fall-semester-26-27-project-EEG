@@ -159,6 +159,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.venv-metd-win/
 
 # Spyder project settings
 .spyderproject

@@ -220,3 +220,301 @@ EEG ≈ 0.43, demographics ≈ 0.43. **Above ~0.75 means the split broke.**
 
 Full detail, including the two silent data-integrity fixes, in `OSF_Park_model/README.md`.
 
+
+---
+
+## METD — protocol-gated classifier (`arch_metd/`)
+
+Spec: `arch_metd/metd_plan.md`. Schedule and gates: `arch_metd/metd_phases.md`.
+Rooted outside `src/` on purpose — `import src.*` pulls in the whole TensorFlow **and**
+torch stack via `src/proposed_model/__init__.py`, which a corpus loader has no use for.
+
+**Phase 0 — contract and registry.** `arch_metd/contract.py` is the only place a dataset
+path, native sampling rate or channel index is written down; everything downstream reads
+the registry rather than restating a path.
+
+```bash
+.venv/bin/python -m arch_metd.contract     # seconds, read-only
+```
+
+Asserts, in order: all five corpus directories plus `subjects_information_*.xlsx` and
+`subject-info.csv` exist; the §4 array contract holds on a synthetic 5-domain batch
+(dtypes, `(N, 6, 512)` float32, finite, row alignment across all nine fields, `y_domain ⊆
+{0..4}`, `anchor == (y_dep==0)|(y_str==0)`, no segment with both labels, protocol matching
+the corpus); and that the contract **rejects** five known bugs — both-labels, stale anchor,
+reserved domain 5, a dropped row in one field, non-finite `X`.
+
+Expected output:
+
+```
+paths OK — 5 corpora, subjects_information_EEG_128channels_resting_lanzhou_2015.xlsx, subject-info.csv
+contract OK — 10 synthetic segments, domains [0, 1, 2, 3, 4], 5 anchors
+rejects OK — 5 known bugs caught
+```
+
+A `FAIL — contract accepted:` line means the contract stopped catching something it used
+to catch; that is more serious than an assertion firing.
+
+**Phases 1-2 — loaders for all five corpora.** Continuous `(6, n)` arrays at native
+rate; no filtering and no windowing (that is phase 3).
+
+```bash
+.venv/bin/python -u -m arch_metd.data.loaders    # ~5 min, reads ~5 GB, read-only
+```
+
+```
+sam40   OK — 480 trials, 40 subjects, 5280 pre-gate windows, 120 relax / 360 task
+modma   OK — 53/53 subjects resolved, 24 MDD / 29 HC, 7959 pre-gate windows
+cogload: 120 files -> 103 recordings (15 duplicate copies merged, 2 cross-subject duplicates dropped)
+cogload OK — 103 recordings, 15 subjects, 4441 pre-gate windows, 15 natural / 88 load
+mumtaz: 120 EC/EO files -> 115 recordings (5 duplicate copies merged, 0 ambiguous dropped)
+mumtaz  OK — 115 recordings, 61 subjects (32 MDD / 29 HC), 17054 pre-gate windows
+          incomplete sessions (7): mumtaz_H12=EO, mumtaz_H18=EO, mumtaz_H25=EC, mumtaz_MDD12=EO, mumtaz_MDD16=EO, mumtaz_MDD4=EO, mumtaz_MDD7=EC
+eegmat  OK — 72 recordings, 36 paired subjects, 4266 pre-gate windows
+phase 1-2 gate: pass
+```
+
+⚠️ **`5280` is the anchor.** 3200 samples at a true 128 Hz gives 11 windows per trial.
+If SAM40 reports 5 windows / 2,400 total, the `data[:, ::2]` decimation bug is back and
+every SAM40 segment is time-stretched 2x — stop and fix it before phase 3.
+
+**CogLoad deduplication corrects `metd_plan.md` §2.3.** Content hashing found two
+distinct problems, not one: `natural-N.txt` is byte-identical between the two task
+folders for all 15 subjects (recorded once, copied into both), and
+`Stroop_Data/highlevel-{14,15}.txt` are identical across two different subjects. The
+rule in `cogload.py` is content-based — same bytes under one subject collapse to one
+recording, same bytes under two subjects drop both — giving **103** recordings, not 120
+and not the ~105 the spec estimates. Keeping the duplicated baselines would double the
+negative class and put identical windows on both sides of a fold, which subject-grouping
+cannot catch.
+
+**Depression N is 114 subjects** — MODMA 53 (24 MDD / 29 HC) + Mumtaz 61 (32 MDD /
+29 HC), against the spec's ~117 estimate. Seven Mumtaz subjects have only one of EC/EO;
+they are kept and logged, not dropped. §7.1 stands: every depression number ships with
+a bootstrap CI, and at this N the CI is roughly ±0.13 even at AUC 0.80.
+
+**Duplicate handling is a three-case rule** (`loaders/__init__.py:dedupe`), and the
+distinction is load-bearing rather than pedantic:
+
+| case | example | action |
+|---|---|---|
+| same bytes, one subject | CogLoad `natural-N` in both task folders; Mumtaz's two `H S15 EO` copies | keep one |
+| same bytes, subjects identical throughout | Mumtaz `H S27`/`H S30`, `MDD S33`/`MDD S34` — duplicated across **both** sessions | merge into one id, keep one copy |
+| same bytes, subjects otherwise distinct | CogLoad `Stroop_Data/highlevel-{14,15}` | drop both — unrecoverable |
+
+Merging matters because a subject retained under two ids defeats grouped CV **silently**:
+the same person sits in train and test and no split assertion can see it. `_common()` in
+the gate now hashes every retained recording and asserts identical bytes never appear
+under two subject ids, across all five corpora.
+
+**Phase 3 — preprocessing, K calibration, build.** Writes the arrays every later phase
+reads. Re-runnable; the output is overwritten, never merged.
+
+```bash
+.venv/bin/python -u -m arch_metd.data.preprocess           # synthetic self-check, seconds
+.venv/bin/python -u -m arch_metd.data.build --calibrate-k  # ~2 min, MODMA only, writes nothing
+.venv/bin/python -u -m arch_metd.data.build                # ~12 min, writes 485 MB
+.venv/bin/python -u -m arch_metd.data.verify               # ~2 min, §11 on the built arrays
+```
+
+Output is `datasets/metd/metd.npz` — one file, so row alignment across the nine fields
+cannot drift, and no `allow_pickle` anywhere. `datasets/` is gitignored wholesale, so
+485 MB cannot be staged by accident. Load it with `build.load()`, which validates the
+§4 contract on the way in.
+
+**`VAR_GATE_K = 10.0`, calibrated on MODMA** (zero dropout and zero NaN by measurement):
+rejects 1.43% of its 7,959 windows, inside the 1-2% target. Ratio distribution is
+p50 = 1.60, p90 = 3.86, p99 = 11.01, so K = 10 sits at 6.3x the median — clear of the
+3-5x Fp1/F3 spread normal frontal EEG shows because blinks load on the prefrontal pair.
+The old K = 5 rejects 6.89%. **K is a property of the filter chain and the data
+together — re-run `--calibrate-k` after any change to either.**
+
+**`BAND_ORDER = 8`, not the 4 that §3.1 specifies.** Measured: order 4 leaves MODMA a
+2.3x mains peak at 1.24e-3 of total power, failing §11. A 45 Hz corner sits only 11%
+below 50 Hz, so even order 8 passes ~18% of the power there — the notch does the
+rejecting and the order decides how much transition-band noise rides along. This
+independently reproduces the order-8 result in `CLAUDE.md`'s filter-design note.
+
+| corpus | recordings | windows | kept | flatline | variance | kept % |
+|---|---:|---:|---:|---:|---:|---:|
+| modma | 53 | 7959 | 7845 | 0 | 114 | 98.6 |
+| sam40 | 480 | 5280 | 5273 | 0 | 7 | 99.9 |
+| cogload | 103 | 4441 | 4168 | 61 | 212 | 93.9 |
+| mumtaz | 115 | 17054 | 16897 | 0 | 157 | 99.1 |
+| eegmat | 72 | 4266 | 4266 | 0 | 0 | 100.0 |
+| **all** | 823 | 39000 | **38449** | 61 | 490 | 98.6 |
+
+⚠️ **CogLoad is the divergent row (93.9% vs EEGMAT's 100%) and it is a finding.** Its
+raw signal is 99.9999% DC — a ~31,000-count pedestal with tiny AC on top — so once the
+1 Hz high-pass removes the pedestal, the residue is wideband amplifier and EMG noise,
+not EEG rhythms. It holds no mains peak (0.37x its stopband neighbours) but 8x EEGMAT's
+above-45 Hz power after gating, and 29x before it. **That is a corpus signature the
+phase 6 probes must be read against.** No filter reaches it: order 10 at a 40 Hz corner
+still leaves 6.2e-3 pre-gate, and lowering the corner *widens* the corpus disparity to
+80x because MODMA benefits more than CogLoad does. Per-corpus filtering would fix the
+number and make preprocessing itself the signature, which §3.2 forbids.
+
+**Baselines — recomputed from the rebuilt arrays, never hardcoded** (`results/baselines.json`):
+
+| baseline | value | use |
+|---|---:|---|
+| **corpus dummy, 3-class** | **0.6109** | the bar every headline number is quoted against |
+| majority class, 3-class | 0.4650 | |
+| majority domain | 0.4395 | target for §8.1's full-set probe |
+| depression majority | 0.5085 | n = 24,742 segments |
+| stress majority | 0.6135 | n = 13,707 segments |
+
+`0.6109` replaces the old pipeline's 0.6267/0.6755. A classifier knowing only which
+corpus a segment came from, with zero EEG understanding, scores it.
+
+`verify.py` asserts §11 on the built arrays: no 50 Hz peak **and** <1e-3 absolute in
+every corpus, per-segment |mean| ≤ 2e-8 and |std−1| ≤ 1.2e-7, label masking per corpus,
+subject class counts against the source spreadsheets (MODMA 24/29, Mumtaz 32/29), and
+SAM40 edge/middle amplitude at 1.054 — the reflect padding leaves no filter transient.
+
+**Phase 4 — splits.** Written before any model, because leakage is a splitting bug and
+it is provable on fold indices alone.
+
+```bash
+.venv/bin/python -u -m arch_metd.train.folds     # ~30 s, assertions only, writes nothing
+```
+
+```
+  outer 0: train  27656 / test  6527 segments,  32 test subjects, domains [0, 1, 2, 3]
+  ...
+  outer 4: train  27127 / test  7056 segments,  35 test subjects, domains [0, 1, 2, 3]
+  cogload LOSO: 15 folds
+  stress_sam40cog_to_eegmat    train domains [1, 2] -> test [4]  (  9441 /  4266 segments)
+  stress_eegmat_to_sam40cog    train domains [4] -> test [1, 2]  (  4266 /  9441 segments)
+  dep_modma_to_mumtaz          train domains [0] -> test [3]  (  7845 / 16897 segments)
+  dep_mumtaz_to_modma          train domains [3] -> test [0]  ( 16897 /  7845 segments)
+phase 4 gate: pass
+```
+
+**Folds are built per corpus and unioned, never over the pooled array** — for both the
+outer and the inner level. Pooled `GroupKFold` balances group sizes, not corpora, so a
+fold can come out with no MODMA in it at all; the depression head then trains or
+early-stops on nothing while the run reports a plausible-looking number. MODMA and
+Mumtaz additionally use `StratifiedGroupKFold` on the class label, since depression is a
+per-subject trait and plain 5-fold on 53 subjects can hand you a fold with almost no MDD.
+SAM40 and CogLoad cannot be stratified that way — every one of their subjects holds both
+classes, so no subject-level label exists.
+
+Asserted: no `subject_id` on both sides of any split at either level, inner validation
+never touches an outer test subject, every outer fold spans all four training corpora,
+EEGMAT in **zero** folds on either side, `y_domain` never 5, and MODMA/Mumtaz never on
+the same side of a depression transfer run — without that last one, "transfer" is just
+within-corpus CV wearing a different name.
+
+**Phase 5 — model and training.** Runs on the GPU workstation; local torch is CPU-only.
+
+```bash
+.venv/bin/python -m arch_metd.models.mtdann        # architecture self-check, seconds, CPU
+.venv/bin/python -u -m arch_metd.train.loop --smoke   # 1/20 of the data, 3 epochs, CPU
+./arch_metd/run_gpu.sh                             # the real run — ON THE WORKSTATION
+```
+
+`run_gpu.sh` is the whole workstation workflow in one script: it md5-checks the
+transferred `metd.npz`, verifies the GPU, builds the image if missing, runs the gates and
+the smoke run, then the full nested CV — see `GPU_Run.md` §7. **Only `metd.npz` (485 MB)
+needs to go up, never the 5 GB of raw corpora**, which is why the loader imports in
+`build.py` and `verify.py` are lazy: `load()` needs numpy alone.
+
+The architecture self-check asserts the four things that fail silently:
+
+- **non-anchor segments put exactly zero gradient on the adversary** (§5.1). A marginal
+  adversary over all segments is asked to erase MODMA-MDD vs SAM40-task — different
+  classes in different domains — so erasing the domain erases the label.
+- **the GRL flips gradient sign**, and λ = 0 passes none at all, so the λ = 0 control is
+  genuinely method-off.
+- **masked BCE divides by the valid-sample count, not the batch size** — otherwise each
+  head's gradient scales with how much of the batch happened to carry its label, which
+  moves under corpus-balanced sampling.
+- **the anchor weighting** gives every present corpus equal total mass, since MODMA's HC
+  segments outnumber SAM40's relax windows by an order of magnitude.
+
+⚠️ **λ crosses 0.5 at p = 0.11, not near the middle** — it is 0.905 by 30% of training.
+So §5.3's "lock early stopping until λ ≥ 0.5" covers only the first 11% of the budget. It
+prevents shipping a completely un-adapted model; it is not evidence that adaptation had
+time to work. `lambda_at_stop` is logged per fold for exactly this reason and is the first
+thing to read in `cv.json`.
+
+**Phase 5 results — read `aggregate.py`, never `cv.json`.**
+
+```bash
+.venv/bin/python -u -m arch_metd.eval.aggregate    # §7 units + bootstrap CIs
+```
+
+`cv.json` carries **segment-level** AUCs, which §7 and §12 item 7 say are never primary.
+`aggregate.py` reduces out-of-fold predictions to the unit the label actually varies over
+by **logit median** — depression to subject, SAM40 to trial, CogLoad to within-subject,
+EEGMAT to §7.3's paired sign test — and attaches a 1,000-iteration bootstrap CI.
+
+| result | subject-level AUC | 95% CI | |
+|---|---:|---|---|
+| depression / **MODMA** | 0.5647 | [0.416, 0.721] | **CI crosses chance** |
+| depression / **Mumtaz** | 0.9386 | [0.866, 0.992] | above §13's expected 0.70-0.85 |
+| depression / pooled *(secondary)* | 0.8051 | [0.722, 0.882] | **do not quote** |
+
+⚠️ **The pooled 0.8051 is a pooling artifact**, exactly as §7.1 predicted. It sits between
+a corpus at chance and one at 0.94, and describes neither. Report the two separately.
+
+⚠️ **Mumtaz's 0.9386 has a batch confound.** Recording length alone predicts the class
+there at AUC 0.709 (MDD 270 ± 54 segments vs HC 285 ± 48); MODMA's equivalent is 0.514.
+Session lengths that differ by class mean the two groups were acquired under systematically
+different conditions, which is a signature the model can use. §6.2 anticipated the pattern:
+when the two depression corpora disagree this sharply, neither number stands alone.
+
+**Three fixes landed after the first run, so its results are superseded — re-run to use them:**
+
+- **Checkpoint selection is gated on λ ≥ 0.5** (`LAMBDA_FLOOR`), not just early stopping.
+  Measured on the first run, the best validation epoch was 4-8 with λ = 0.20-0.38 in 3 of
+  5 folds, so the shipped checkpoint was un-adapted while `lambda_at_stop` read a
+  reassuring 0.74-0.82. The lock delayed stopping; it did not gate what got selected.
+- **Predictions now carry `subject_id`, `trial_id` and `condition`.** Without them,
+  subject-level aggregation had to reconstruct identity from the fold indices, and that
+  only worked for two of four corpora — see below.
+- **`build.py` writes a fingerprint** (`results/build_info.json`, and `--fingerprint`),
+  stamped into `cv.json` and printed by `run_gpu.sh`. The first run's arrays turned out
+  **not** to be the local ones: SAM40 rows were reordered in 5/5 folds and CogLoad in 2/5,
+  which is invisible in every summary statistic and cost a long forensic detour.
+  `run_gpu.sh` no longer md5s the file — two honest rebuilds legitimately differ at
+  floating-point gate boundaries — it prints the fingerprint instead.
+
+`aggregate.py` still recovers identity for predictions saved before that fix, but only for
+corpora whose label sequence matches the split **exactly**, and it drops any corpus that
+fails in even one fold. That is why the table above has no stress rows: SAM40 and CogLoad
+were excluded, 9,441 of 34,183 segments.
+
+**Phase 5 controls (§8.3) — main plus three, in one session.**
+
+```bash
+.venv/bin/python -u -m arch_metd.train.loop --smoke --all-modes   # ~1 min CPU, mechanics only
+./arch_metd/run_gpu.sh                                            # runs --all-modes
+```
+
+| mode | what it is | reads as |
+|---|---|---|
+| `main` | the model | the result |
+| `lambda0` | λ fixed at 0, adversary off | **the** comparison — without it "adaptation helped" is unfalsifiable |
+| `permuted` | labels shuffled within corpus | must collapse to 0.50 |
+| `randbb` | frozen random backbone, heads trained | separates learned representation from input artifact |
+
+Outputs are tagged per mode (`cv_lambda0.json`, `preds_fold*_lambda0.npz`, …) so nothing
+overwrites the main run — the same separation `DL_Without_Features/` needs for its smoke
+output, and for the same reason.
+
+**Trained weights are now saved** (`model_fold*<tag>.pt`). §8.1's frozen domain probe and
+§8.2's silhouette both freeze a *trained* backbone; the first run kept weights in memory
+only, which left phase 6 unable to start without retraining.
+
+`permute_within_corpus` shuffles labels at the **aggregation unit** — subject for the
+depression corpora, trial for the stress ones — not at the segment. Shuffling segment
+labels inside a subject would leave that subject's mean label almost unchanged, so a
+subject-level metric would barely move and the control would pass while testing nothing.
+It asserts the unit-level label multiset survives; the segment-level balance legitimately
+shifts, because units differ in length by 3-4x (Mumtaz 93-336 segments each).
+
+Verified on the smoke run: `randbb`'s backbone is bit-identical to its initialisation
+while its heads moved, `main`'s backbone moved, `lambda0` reports λ = 0.0 at every stop,
+and predictions carry `subject_id` / `trial_id` / `condition`.

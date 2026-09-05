@@ -191,6 +191,48 @@ entry to `dl_plan.md` — that file is a running log, not just a spec.
 
 ---
 
+## 7. METD (`arch_metd/`) — one script
+
+The protocol-gated build is pure torch and needs nothing from the Keras track. It is also
+the cheapest thing here to move: **it reads one 485 MB `.npz` and never the raw corpora.**
+
+```bash
+# from the laptop — ~500 MB total
+rsync -avP --exclude .venv --exclude .git --exclude datasets ./ <you>@10.30.161.74:~/eeg/
+rsync -avP datasets/metd/ <you>@10.30.161.74:~/eeg/datasets/metd/
+
+# on the box
+ssh <you>@10.30.161.74
+tmux new -s metd
+cd ~/eeg && ./arch_metd/run_gpu.sh
+```
+
+`run_gpu.sh` runs **on the host** and starts the container itself. It needs `docker login
+nvcr.io` done once first (§1.1) if `eeg-project:torch` has not been built yet.
+
+| flag | does |
+|---|---|
+| `--check` | preflight only — data present and intact, GPU visible, image status. Starts nothing. |
+| `--smoke` | preflight, gates, and the ~2 min smoke run. Skips the real one. |
+| *(none)* | all of the above, then the full nested CV. |
+
+It refuses to start on a bad transfer: `metd.npz` is md5-checked against the value baked
+into the script, because a truncated 485 MB rsync otherwise fails hours later and much
+more confusingly. It also warns if you are not inside `tmux`, passes `--user $(id -u):$(id
+-g)` so results come back owned by you rather than root, and runs three second-long gates
+(GRL sign, anchor gate, fold disjointness) before spending any GPU time.
+
+Results land in `arch_metd/results/` on the host — `cv.json`, `train.log`, and per-fold
+`preds_fold*.npz`. Pull them back with:
+
+```bash
+rsync -avP <you>@10.30.161.74:~/eeg/arch_metd/results/ arch_metd/results/
+```
+
+**Read `lambda_at_stop` in `cv.json` before anything else.** It must be ≥ 0.5 in every
+fold; below that, early stopping fired before the adversary was switched on and the run
+measured a model that never adapted.
+
 ## Gotchas
 
 - **`$oauthtoken` is the NGC username.** Not your email, not your name.
