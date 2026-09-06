@@ -657,3 +657,34 @@ unanswerable — better to see that in the same log.
 `eval/report.py` assembles `arch_metd/REPORT.md` from `results/*.json`. Sections whose
 inputs are missing are printed as *not run* rather than omitted, so the report states what
 has not happened as plainly as what has.
+
+## Running the whole pipeline locally
+
+```bash
+./arch_metd/run_local.sh --check      # preflight only, starts nothing
+./arch_metd/run_local.sh --smoke      # smoke CV + smoke transfer, ~6 min
+./arch_metd/run_local.sh              # everything: gates, CV, transfer, analysis
+./arch_metd/run_local.sh --cv         # gates + CV only
+./arch_metd/run_local.sh --transfer   # transfer only
+./arch_metd/run_local.sh --analyse    # no training: aggregate, probes, controls, report
+```
+
+No Docker and no GPU — it runs in the project `.venv`. `run_gpu.sh` remains the
+workstation path; this is the same stages against CPU torch, plus the analysis steps that
+`run_gpu.sh` leaves for afterwards.
+
+⚠️ **Local torch is `2.13.0+cpu`, so this is hours, not the ~12 minutes the GPU box
+takes** — roughly 4-5 h for the four CV modes, 2-4 h for the 16 transfer runs, ~15 min for
+analysis (the frozen probes dominate). `--cv` and `--transfer` exist so the work can be
+split across sessions; run it under `tmux`.
+
+**Preflight refuses to let you confound the robustness comparison.** It prints the array
+fingerprint and the split hash, and compares the fingerprint against the kept draw in
+`arch_metd/results_split_A/`. They currently differ — Run A was built on the workstation
+(`3d017f08c581c5fd`), this machine has `59cc093f949968b0` — so a local run changes **both**
+the arrays and the split, and a result that moves between the two draws could not be
+attributed to either. Copy the workstation's `metd.npz` down first, or treat a local run
+as an independent third draw and do not diff it against Run A.
+
+It also prints `free -h` and warns below 2.5 GB available, and logs everything to
+`arch_metd/results/run_local.log`.

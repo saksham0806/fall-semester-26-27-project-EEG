@@ -21,7 +21,7 @@ from ..models.mtdann import MTDANN
 from ..train.folds import TRAIN_DOMAINS, outer_folds
 
 RESULTS = ROOT / "arch_metd/results"
-MODES = ("main", "lambda0", "randbb")
+MODES = ("main", "lambda0_locked", "lambda0", "randbb")
 
 
 @torch.no_grad()
@@ -93,6 +93,10 @@ def run():
 
     # The criterion pre-registered on 2026-09-06 (preregistration 2), replacing §8.2's
     # silhouette — which could not adjudicate, all modes landing within ±0.004 of zero.
+    # Evaluated against `lambda0` exactly as pre-registered. That criterion was recorded
+    # before the `lambda0_locked` arm existed; switching the referent now would be
+    # rewriting a pre-registration after seeing data. The locked arm — the clean control —
+    # is reported beside it.
     a_main = out["modes"]["main"]["anchor_probe"]
     a_zero = out["modes"]["lambda0"]["anchor_probe"]
     per_fold = np.array(out["modes"]["lambda0"]["anchor_folds"]) - \
@@ -108,7 +112,11 @@ def run():
         # representation cannot be quoted as invariance
         "anchor_vs_chance": float(a_main - 1 / n_dom),
         "full_vs_majority": float(out["modes"]["main"]["full_probe"] - majority),
-        "silhouette_superseded": {m: out["modes"][m]["silhouette"] for m in MODES}}
+        "silhouette_superseded": {m: out["modes"][m]["silhouette"] for m in MODES},
+        "vs_locked_control": {
+            "lambda0_locked": out["modes"]["lambda0_locked"]["anchor_probe"],
+            "margin": float(out["modes"]["lambda0_locked"]["anchor_probe"] - 0.05 - a_main),
+            "passes": bool(a_main < out["modes"]["lambda0_locked"]["anchor_probe"] - 0.05)}}
     g = out["gate"]
     print(f"\ngate (pre-registered): anchor(main) {a_main:.4f} < anchor(lambda0)-0.05 "
           f"{a_zero - 0.05:.4f} -> {'PASS' if g['passes'] else 'FAIL'} "
