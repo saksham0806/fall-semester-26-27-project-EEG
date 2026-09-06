@@ -591,7 +591,11 @@ the same split, so no stress number was reproducible. `folds.py` now asserts tha
 shuffling the input rows leaves all 169 subject-to-fold assignments identical, over three
 permutations.
 
-**2. The heads are class-weighted.** Measured on the pre-fix run:
+**2. The heads are class-weighted — and the stress head still does not work.** The gate
+FAILED: separation reached +0.044 against a 0.10 bar. Calibration was fixed (out-of-domain
+medians moved from 0.812, *above* the in-domain positives, to 0.520, below them) but
+**calibration on a head with no discrimination is calibration to chance.** The head was
+miscalibrated and weak; only the first was a bug. Measured on the pre-fix run:
 
 | | stress | depression |
 |---|---:|---:|

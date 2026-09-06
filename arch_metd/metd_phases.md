@@ -304,6 +304,14 @@ near 0.8 looks like. Then re-run.
 positive median. A collapsed head makes the transfer test unanswerable: EEGMAT would score
 whatever a constant predictor scores, and that number would say nothing about transfer.
 
+**Outcome: FAILED.** Class weighting fixed the calibration — medians moved 0.808/0.782/
+0.812 to 0.525/0.480/0.520, so the out-of-domain no longer sits above the in-domain
+positives — but separation reached only **+0.044** against the 0.10 bar. This is not
+partial success. **Calibration on a head with no discrimination is calibration to
+chance**: the head was miscalibrated *and* weak, and only the first was a bug. It is
+consistent with 15/36 on the held-out corpus and with SAM40 trial AUC 0.5884. Report the
+stress head as not working, not as improved.
+
 ### 3. Audit Mumtaz's batch structure
 
 **The finding to explain.** Mumtaz sits at subject-level AUC **0.9418**, above §13's

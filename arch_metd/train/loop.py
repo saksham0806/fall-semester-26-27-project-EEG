@@ -11,6 +11,7 @@ import json
 import time
 
 import numpy as np
+import sklearn
 import torch
 from sklearn.metrics import roc_auc_score
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -21,7 +22,7 @@ from ..data.build import fingerprint, load
 from ..models.grl import lambda_at
 from ..models.heads import anchor_weights, positive_weight
 from ..models.mtdann import MTDANN
-from .folds import TRANSFERS, inner_folds, outer_folds, transfer
+from .folds import TRANSFERS, inner_folds, outer_folds, split_hash, transfer
 
 RESULTS = ROOT / "arch_metd/results"
 BATCH = 64
@@ -87,7 +88,22 @@ def youden(y, score):
     return float(np.sort(score)[::-1][np.argmax(tpr - fpr)])
 
 
-def permute_within_corpus(d, seed=0):
+def lock_epoch(epochs, floor=LAMBDA_FLOOR):
+    """First epoch at which the STANDARD schedule reaches the floor.
+
+    The lock is expressed as an epoch, not as a lambda value, so it can be held fixed
+    while lambda varies. Tying it to `lambd >= floor` conflated two things: a lambda = 0
+    arm could never satisfy it, so it silently ran with no lock at all and was free to
+    select epoch 0. That made lambda = 0 a comparison of *adversary plus stopping rule*
+    against *neither*, which is not a method control.
+    """
+    for e in range(epochs):
+        if lambda_at(e / max(epochs - 1, 1)) >= floor:
+            return e
+    return 0
+
+
+def permute_within_corpus(d, seed=0, domains=None):
     """§8.3 negative control: shuffle labels within each corpus. AUC must collapse to 0.50.
 
     Permuted at the AGGREGATION UNIT, not the segment — subject for the depression
@@ -98,6 +114,10 @@ def permute_within_corpus(d, seed=0):
     rng = np.random.default_rng(seed)
     out = {k: v.copy() for k, v in d.items()}
     for c in CORPORA:
+        # for a transfer null only the TRAINING corpora are permuted; the test corpus
+        # keeps its real labels or there is nothing to evaluate against
+        if domains is not None and c.domain not in domains:
+            continue
         m = d["y_domain"] == c.domain
         head = "y_dep" if c.task == "depression" else "y_str"
         unit = d["subject_id"] if c.task == "depression" else d["trial_id"]
@@ -115,7 +135,7 @@ def permute_within_corpus(d, seed=0):
 
 
 def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, seed=0,
-               lambda_fn=lambda_at, floor=LAMBDA_FLOOR, random_backbone=False):
+               lambda_fn=lambda_at, locked=True, random_backbone=False):
     torch.manual_seed(seed)
     model = MTDANN().to(device)
     if random_backbone:
@@ -134,6 +154,7 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
 
     best = {"score": -np.inf, "epoch": -1, "state": None, "lambda": 0.0}
     fallback = None
+    lock = lock_epoch(epochs) if locked else 0
     for epoch in range(epochs):
         model.train()
         if random_backbone:
@@ -158,12 +179,12 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
         # best epoch landed at 4-8 with lambda 0.20-0.38 in 3 of 5 folds, so the
         # selected checkpoint was un-adapted while lambda_at_stop read a reassuring
         # 0.74-0.82. Gating selection, not just stopping, is what closes that.
-        if lambd >= floor and score > best["score"]:
+        if epoch >= lock and score > best["score"]:
             best = snapshot
         # §5.3: early stopping is LOCKED until lambda >= 0.5. Without the lock, patience
         # can fire while lambda is still near zero and you ship the un-adapted model by
         # accident — the adversary would never have been switched on.
-        if lambd >= floor and epoch - best["epoch"] >= patience:
+        if epoch >= lock and epoch - best["epoch"] >= patience:
             break
 
     if best["state"] is None:
@@ -172,7 +193,8 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
         best = fallback
         best["below_floor"] = True
     model.load_state_dict(best["state"])
-    return model, {"best_epoch": best["epoch"], "lambda_at_stop": round(lambd, 4),
+    return model, {"best_epoch": best["epoch"], "lock_epoch": lock,
+                   "lambda_at_stop": round(lambd, 4),
                    "pos_weight": {k: None if v is None else round(float(v), 4)
                                   for k, v in pos_weight.items()},
                    "lambda_at_best": round(best["lambda"], 4),
@@ -182,9 +204,13 @@ def train_fold(d, train_idx, val_idx, device, epochs=EPOCHS, patience=PATIENCE, 
 
 MODES = {
     "main": {},
-    # the method-off control. §12 item 9 and the DANN post-mortem in CLAUDE.md: without
-    # it, "the adversary helped" is unfalsifiable.
-    "lambda0": {"lambda_fn": lambda p: 0.0, "floor": -np.inf},
+    # THE method control: lambda = 0 with the early-stopping lock RETAINED, so the only
+    # thing that differs from `main` is the adversary. `lambda0` below keeps the original
+    # unlocked behaviour for continuity with the earlier runs, but it varies two things at
+    # once and is not a method comparison — measured, it selected epoch 0 where main could
+    # not select before epoch 11.
+    "lambda0_locked": {"lambda_fn": lambda p: 0.0, "locked": True},
+    "lambda0": {"lambda_fn": lambda p: 0.0, "locked": False},
     "permuted": {"permute": True},
     "randbb": {"random_backbone": True},
 }
@@ -200,7 +226,10 @@ def run_transfer(name, mode, d, device, epochs, patience):
     """
     train_idx, test_idx = transfer(d, name)
     cfg = dict(MODES[mode])
-    cfg.pop("permute", None)
+    if cfg.pop("permute", False):
+        # permute the TRAINING corpora only (§8.3 applied to transfer, which the CV-only
+        # permutation control never covered)
+        d = permute_within_corpus(d, domains=set(TRANSFERS[name][0]))
     inner_train, inner_val = next(inner_folds(d, train_idx))
     t0 = time.time()
     model, info = train_fold(d, inner_train, inner_val, device, epochs=epochs,
@@ -241,12 +270,13 @@ def run_all_transfers(smoke=False):
     epochs = 3 if smoke else EPOCHS
     out = []
     for name in TRANSFERS:
-        for mode in ("main", "lambda0"):  # every transfer with its own method-off control
+        for mode in ("main", "lambda0_locked", "lambda0", "permuted"):
             out.append(run_transfer(name, mode, d, device, epochs,
                                     1 if smoke else PATIENCE))
     path = RESULTS / f"transfer{'_smoke' if smoke else ''}.json"
     path.write_text(json.dumps({"device": device, "epochs": epochs,
-                                "fingerprint": fingerprint(d), "runs": out}, indent=2))
+                                "fingerprint": fingerprint(d), "split_hash": split_hash(d),
+                                "sklearn": sklearn.__version__, "runs": out}, indent=2))
     print(f"wrote {path}")
 
 
@@ -295,6 +325,7 @@ def run(smoke=False, mode="main"):
     # stamp which arrays produced this, so a later aggregate can refuse a mismatch
     out.write_text(json.dumps({"device": device, "epochs": epochs, "mode": mode,
                                "fingerprint": fingerprint(d),
+                               "split_hash": split_hash(d), "sklearn": sklearn.__version__,
                                "n_segments": int(len(d["X"])),
                                "folds": results}, indent=2))
     print(f"wrote {out}")

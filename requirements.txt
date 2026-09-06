@@ -3,7 +3,7 @@ pandas
 scipy
 matplotlib
 seaborn
-scikit-learn
+scikit-learn==1.9.0   # pinned: GroupKFold tie-breaking changed across versions (see arch_metd/train/folds.py)
 joblib
 jupyter
 notebook

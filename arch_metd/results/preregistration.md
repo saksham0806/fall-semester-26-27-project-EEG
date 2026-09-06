@@ -98,3 +98,33 @@ Fall back to independent single-task backbones, per §8.2's original consequence
 ## Reported regardless of verdict
 
 Anchor probe and full-set probe at λ=1, λ=0 and random-backbone, with the margin.
+
+## Outcome — measured 2026-09-06 on the fixed pipeline
+
+| mode | anchor probe (chance 0.250) | full-set probe (majority 0.4943) |
+|---|---:|---:|
+| main (λ=1) | **0.3605** | 0.5388 |
+| lambda0 (λ=0) | 0.4115 | 0.5776 |
+| randbb (random) | 0.4649 | 0.5997 |
+
+**Gate: PASS.** 0.3605 < 0.4115 − 0.05 = 0.3615, by a margin of **0.0010**.
+
+**Robustness, reported because the criterion does not require it and a reader needs it.**
+Only **2 of 5 folds** clear the threshold individually, and the per-fold margin is
+0.0510 ± 0.0236 — the 0.05 bar sits essentially on the mean. The criterion is met as
+written; the pass is not robust, and a re-run could plausibly return the other verdict.
+
+**The reporting obligation, discharged.** The representation is *not* invariant: the
+anchor probe remains **+0.1105 above balanced chance** and the full-set probe **+0.0445
+above the majority domain**. Adversarial training removed some domain information relative
+to its own control. It did not achieve invariance, and this gate never claimed it did.
+
+**Read this next to the transfer result, which is the point of the exercise.** On the one
+direction where the adversary is operative (SAM40+CogLoad → EEGMAT, §7.3 paired sign
+test), λ=1 scores **0.4167** and λ=0 scores **0.6667**. Domain removal was achieved,
+marginally — and it *cost* generalisation rather than buying it. The gate passing and the
+architecture failing are not in conflict: the gate tested whether the mechanism does what
+it says, and it does, weakly. Whether that mechanism helps is what the transfer test
+answers, and the answer is no.
+
+Superseded silhouette values, for the record: main −0.0001, λ=0 +0.0025, random +0.0033.
