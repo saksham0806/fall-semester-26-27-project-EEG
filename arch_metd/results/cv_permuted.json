@@ -6,114 +6,134 @@
   "n_segments": 38449,
   "folds": [
     {
-      "best_epoch": 13,
-      "lambda_at_stop": 0.8884,
-      "lambda_at_best": 0.5761,
+      "best_epoch": 24,
+      "lambda_at_stop": 0.9618,
+      "pos_weight": {
+        "dep": 1.3457,
+        "str": 0.2517
+      },
+      "lambda_at_best": 0.8373,
       "selected_below_lambda_floor": false,
-      "stopped_epoch": 28,
+      "stopped_epoch": 39,
       "inner_auc": {
-        "dep": 0.5836363073331219,
-        "str": 0.5077035339022486
+        "dep": 0.6133529706528736,
+        "str": 0.5199419134169505
       },
       "fold": 0,
       "test_auc": {
-        "dep": 0.519876191794,
-        "str": 0.49018833507282356
+        "dep": 0.5305861946272905,
+        "str": 0.5170861815526282
       },
       "thresholds": {
-        "dep": 0.3950258493423462,
-        "str": 0.8340579867362976
+        "dep": 0.45471224188804626,
+        "str": 0.5802346467971802
       },
-      "domain_acc": 0.15324019024970273,
-      "elapsed_sec": 27.1
+      "domain_acc": 0.16230677764565993,
+      "elapsed_sec": 38.0
     },
     {
-      "best_epoch": 12,
-      "lambda_at_stop": 0.8772,
-      "lambda_at_best": 0.5413,
+      "best_epoch": 63,
+      "lambda_at_stop": 0.9992,
+      "pos_weight": {
+        "dep": 1.1639,
+        "str": 0.2578
+      },
+      "lambda_at_best": 0.9966,
       "selected_below_lambda_floor": false,
-      "stopped_epoch": 27,
+      "stopped_epoch": 78,
       "inner_auc": {
-        "dep": 0.5391389912396299,
-        "str": 0.5362834289901087
+        "dep": 0.5722391045187731,
+        "str": 0.5117925808333672
       },
       "fold": 1,
       "test_auc": {
-        "dep": 0.4107968446051579,
-        "str": 0.48448328421908343
+        "dep": 0.4635466765322481,
+        "str": 0.47482979372015044
       },
       "thresholds": {
-        "dep": 0.297952264547348,
-        "str": 0.7521525025367737
+        "dep": 0.29506948590278625,
+        "str": 0.4660460650920868
       },
-      "domain_acc": 0.1494800693240901,
-      "elapsed_sec": 25.0
+      "domain_acc": 0.14586943963027152,
+      "elapsed_sec": 73.2
     },
     {
-      "best_epoch": 27,
-      "lambda_at_stop": 0.9717,
-      "lambda_at_best": 0.8772,
+      "best_epoch": 25,
+      "lambda_at_stop": 0.9654,
+      "pos_weight": {
+        "dep": 1.2703,
+        "str": 0.2327
+      },
+      "lambda_at_best": 0.8518,
       "selected_below_lambda_floor": false,
-      "stopped_epoch": 42,
+      "stopped_epoch": 40,
       "inner_auc": {
-        "dep": 0.5200797645839449,
-        "str": 0.5415388864378998
+        "dep": 0.5038316717221685,
+        "str": 0.5056958597412473
       },
       "fold": 2,
       "test_auc": {
-        "dep": 0.5686254604027764,
-        "str": 0.5162145633670665
+        "dep": 0.5275358384188135,
+        "str": 0.4989584031454549
       },
       "thresholds": {
-        "dep": 0.41369837522506714,
-        "str": 0.834632158279419
+        "dep": 0.6451322436332703,
+        "str": 0.5044130682945251
       },
-      "domain_acc": 0.16910103900015058,
-      "elapsed_sec": 39.6
+      "domain_acc": 0.16398132811323596,
+      "elapsed_sec": 38.5
     },
     {
-      "best_epoch": 11,
-      "lambda_at_stop": 0.8651,
-      "lambda_at_best": 0.5047,
+      "best_epoch": 34,
+      "lambda_at_stop": 0.9859,
+      "pos_weight": {
+        "dep": 1.0247,
+        "str": 0.2737
+      },
+      "lambda_at_best": 0.9375,
       "selected_below_lambda_floor": false,
-      "stopped_epoch": 26,
+      "stopped_epoch": 49,
       "inner_auc": {
-        "dep": 0.5661079343804781,
-        "str": 0.5266130698759139
+        "dep": 0.5241907458890335,
+        "str": 0.5031980949194572
       },
       "fold": 3,
       "test_auc": {
-        "dep": 0.5721467849278501,
-        "str": 0.5129155568127353
+        "dep": 0.5724869703567929,
+        "str": 0.5027363301353827
       },
       "thresholds": {
-        "dep": 0.5212191343307495,
-        "str": 0.7884347438812256
+        "dep": 0.6706175208091736,
+        "str": 0.45530882477760315
       },
-      "domain_acc": 0.16295325469637395,
-      "elapsed_sec": 25.1
+      "domain_acc": 0.14300276685597788,
+      "elapsed_sec": 46.4
     },
     {
-      "best_epoch": 14,
-      "lambda_at_stop": 0.8986,
-      "lambda_at_best": 0.6088,
+      "best_epoch": 39,
+      "lambda_at_stop": 0.9915,
+      "pos_weight": {
+        "dep": 0.8945,
+        "str": 0.277
+      },
+      "lambda_at_best": 0.9618,
       "selected_below_lambda_floor": false,
-      "stopped_epoch": 29,
+      "stopped_epoch": 54,
       "inner_auc": {
-        "dep": 0.5768162706717027,
-        "str": 0.5453522536484566
+        "dep": 0.7058737835170817,
+        "str": 0.5065091049980628
       },
       "fold": 4,
       "test_auc": {
-        "dep": 0.4886445909327009,
-        "str": 0.5131629034948524
+        "dep": 0.45030555705283376,
+        "str": 0.5031212441349695
       },
       "thresholds": {
-        "dep": 0.4471302628517151,
-        "str": 0.7935316562652588
+        "dep": 0.4281280040740967,
+        "str": 0.4670056700706482
       },
-      "domain_acc": 0.14267407090986758,
-      "elapsed_sec": 26.9
+      "domain_acc": 0.14851203189520149,
+      "elapsed_sec": 50.8
     }
   ]
 }
