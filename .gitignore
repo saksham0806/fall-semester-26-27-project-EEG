@@ -1,5 +1,8 @@
 # Byte-compiled / optimized / DLL files
 
+scratch/
+scratch/*
+
 */_cache/
 __pycache__/
 *.py[codz]
