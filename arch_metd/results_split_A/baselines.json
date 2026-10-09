@@ -1,0 +1,21 @@
+{
+  "n_segments": 38449,
+  "segments_per_domain": {
+    "modma": 7845,
+    "sam40": 5273,
+    "cogload": 4168,
+    "mumtaz": 16897,
+    "eegmat": 4266
+  },
+  "majority_domain": 0.4394652656766106,
+  "y_dep": {
+    "n": 24742,
+    "majority": 0.5084875919489128
+  },
+  "y_str": {
+    "n": 13707,
+    "majority": 0.6134821623987744
+  },
+  "corpus_dummy_3class": 0.6109131576894068,
+  "majority_3class": 0.46500559182293427
+}

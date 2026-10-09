@@ -1,0 +1,387 @@
+{
+  "plan": "01",
+  "task": "4class",
+  "n_dev": 421,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "majority": 0.37767220902612825,
+  "chance": 0.25,
+  "demo_bar": 0.5003504265693564,
+  "results": [
+    {
+      "model": "DEMO [l2]",
+      "n": 421,
+      "balanced_accuracy": 0.5003504265693564,
+      "macro_f1": 0.427171293618662,
+      "accuracy": 0.42992874109263657,
+      "macro_auc": 0.7026462368364357,
+      "recall_per_class": {
+        "healthy": 0.7432432432432432,
+        "depression": 0.1320754716981132,
+        "anxiety": 0.6162790697674418,
+        "stress": 0.5098039215686274
+      },
+      "confusion": [
+        [
+          55,
+          4,
+          7,
+          8
+        ],
+        [
+          35,
+          21,
+          57,
+          46
+        ],
+        [
+          12,
+          5,
+          53,
+          16
+        ],
+        [
+          19,
+          6,
+          25,
+          52
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "1 (7/15)"
+      },
+      "elapsed_sec": 6.7,
+      "p": 4,
+      "vs_demo": 0.0
+    },
+    {
+      "model": "SPECTRAL [elasticnet]",
+      "n": 421,
+      "balanced_accuracy": 0.31548105289813466,
+      "macro_f1": 0.3031533441676351,
+      "accuracy": 0.3016627078384798,
+      "macro_auc": 0.5708108138495886,
+      "recall_per_class": {
+        "healthy": 0.43243243243243246,
+        "depression": 0.27044025157232704,
+        "anxiety": 0.313953488372093,
+        "stress": 0.24509803921568626
+      },
+      "confusion": [
+        [
+          32,
+          13,
+          14,
+          15
+        ],
+        [
+          35,
+          43,
+          36,
+          45
+        ],
+        [
+          14,
+          22,
+          27,
+          23
+        ],
+        [
+          17,
+          32,
+          28,
+          25
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (6/15)",
+        "logisticregression__l1_ratio": "0.5 (8/15)"
+      },
+      "elapsed_sec": 279.3,
+      "p": 136,
+      "vs_demo": -0.1848693736712217
+    },
+    {
+      "model": "GRAPH [elasticnet]",
+      "n": 421,
+      "balanced_accuracy": 0.3305310253081463,
+      "macro_f1": 0.31494881185051526,
+      "accuracy": 0.31353919239904987,
+      "macro_auc": 0.588560743329702,
+      "recall_per_class": {
+        "healthy": 0.5135135135135135,
+        "depression": 0.2641509433962264,
+        "anxiety": 0.22093023255813954,
+        "stress": 0.3235294117647059
+      },
+      "confusion": [
+        [
+          38,
+          17,
+          9,
+          10
+        ],
+        [
+          36,
+          42,
+          36,
+          45
+        ],
+        [
+          13,
+          30,
+          19,
+          24
+        ],
+        [
+          16,
+          31,
+          22,
+          33
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (13/15)",
+        "logisticregression__l1_ratio": "0.5 (6/15)"
+      },
+      "elapsed_sec": 177.8,
+      "p": 138,
+      "vs_demo": -0.16981940126121003
+    },
+    {
+      "model": "EEG [elasticnet]",
+      "n": 421,
+      "balanced_accuracy": 0.36571009165735957,
+      "macro_f1": 0.3465521575198995,
+      "accuracy": 0.33966745843230406,
+      "macro_auc": 0.6278786923642647,
+      "recall_per_class": {
+        "healthy": 0.581081081081081,
+        "depression": 0.25157232704402516,
+        "anxiety": 0.26744186046511625,
+        "stress": 0.3627450980392157
+      },
+      "confusion": [
+        [
+          43,
+          19,
+          6,
+          6
+        ],
+        [
+          32,
+          40,
+          39,
+          48
+        ],
+        [
+          12,
+          27,
+          23,
+          24
+        ],
+        [
+          14,
+          30,
+          21,
+          37
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (13/15)",
+        "logisticregression__l1_ratio": "0.9 (7/15)"
+      },
+      "elapsed_sec": 336.0,
+      "p": 274,
+      "vs_demo": -0.13464033491199678
+    },
+    {
+      "model": "EEG+DEMO [elasticnet]",
+      "n": 421,
+      "balanced_accuracy": 0.5177836542631473,
+      "macro_f1": 0.48129572496029577,
+      "accuracy": 0.47030878859857483,
+      "macro_auc": 0.729038441848143,
+      "recall_per_class": {
+        "healthy": 0.7837837837837838,
+        "depression": 0.2830188679245283,
+        "anxiety": 0.46511627906976744,
+        "stress": 0.5392156862745098
+      },
+      "confusion": [
+        [
+          58,
+          4,
+          5,
+          7
+        ],
+        [
+          26,
+          45,
+          51,
+          37
+        ],
+        [
+          8,
+          22,
+          40,
+          16
+        ],
+        [
+          11,
+          18,
+          18,
+          55
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.1 (11/15)",
+        "logisticregression__l1_ratio": "0.5 (6/15)"
+      },
+      "elapsed_sec": 303.7,
+      "p": 278,
+      "vs_demo": 0.017433227693790965
+    },
+    {
+      "model": "EEG [l2]",
+      "n": 421,
+      "balanced_accuracy": 0.3842836590300648,
+      "macro_f1": 0.368238390690962,
+      "accuracy": 0.3681710213776722,
+      "macro_auc": 0.6283808111051805,
+      "recall_per_class": {
+        "healthy": 0.6351351351351351,
+        "depression": 0.34591194968553457,
+        "anxiety": 0.23255813953488372,
+        "stress": 0.3235294117647059
+      },
+      "confusion": [
+        [
+          47,
+          15,
+          6,
+          6
+        ],
+        [
+          30,
+          55,
+          37,
+          37
+        ],
+        [
+          10,
+          30,
+          20,
+          26
+        ],
+        [
+          13,
+          30,
+          26,
+          33
+        ]
+      ],
+      "selected_params": {
+        "logisticregression__C": "0.01 (12/15)"
+      },
+      "elapsed_sec": 5.8,
+      "p": 274,
+      "vs_demo": -0.11606676753929157
+    },
+    {
+      "model": "EEG [rbf]",
+      "n": 421,
+      "balanced_accuracy": 0.33349831518532963,
+      "macro_f1": 0.2738304935144677,
+      "accuracy": 0.4180522565320665,
+      "macro_auc": 0.6350362664489987,
+      "recall_per_class": {
+        "healthy": 0.3918918918918919,
+        "depression": 0.8930817610062893,
+        "anxiety": 0.0,
+        "stress": 0.049019607843137254
+      },
+      "confusion": [
+        [
+          29,
+          44,
+          0,
+          1
+        ],
+        [
+          11,
+          142,
+          1,
+          5
+        ],
+        [
+          6,
+          73,
+          0,
+          7
+        ],
+        [
+          9,
+          87,
+          1,
+          5
+        ]
+      ],
+      "selected_params": {
+        "svc__C": "1 (14/15)"
+      },
+      "elapsed_sec": 5.3,
+      "p": 274,
+      "vs_demo": -0.16685211138402672
+    },
+    {
+      "model": "RAW_BASELINE [rbf]",
+      "n": 421,
+      "balanced_accuracy": 0.3480367159612443,
+      "macro_f1": 0.2673855633802817,
+      "accuracy": 0.42755344418052255,
+      "macro_auc": 0.5993056377686445,
+      "recall_per_class": {
+        "healthy": 0.4864864864864865,
+        "depression": 0.9056603773584906,
+        "anxiety": 0.0,
+        "stress": 0.0
+      },
+      "confusion": [
+        [
+          36,
+          38,
+          0,
+          0
+        ],
+        [
+          15,
+          144,
+          0,
+          0
+        ],
+        [
+          10,
+          76,
+          0,
+          0
+        ],
+        [
+          7,
+          95,
+          0,
+          0
+        ]
+      ],
+      "selected_params": {
+        "svc__C": "1 (11/15)"
+      },
+      "elapsed_sec": 22.8,
+      "p": 1140,
+      "vs_demo": -0.15231371060811205
+    }
+  ]
+}

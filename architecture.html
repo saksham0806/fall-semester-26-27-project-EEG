@@ -1,0 +1,378 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hierarchical two-stage EEG classifier — architecture</title>
+<style>
+  :root{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EDF1F4;
+    --ink:#10171D; --muted:#5A6B78; --line:#D3DBE1;
+    --accent:#0B7A75; --accent-soft:#0B7A751A;
+    --signal:#B4622A; --signal-soft:#B4622A1A;
+    --good:#2E7D5B; --warn:#A8632A; --bad:#A63D40;
+    --radius:3px;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,"Liberation Mono",monospace;
+    --sans:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0F1418; --surface:#161D23; --surface-2:#1D262E;
+      --ink:#E6EDF3; --muted:#8FA3B0; --line:#2A353E;
+      --accent:#4FC3BC; --accent-soft:#4FC3BC1F;
+      --signal:#E0965C; --signal-soft:#E0965C1F;
+      --good:#5FBF92; --warn:#D69A5C; --bad:#D97078;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1418; --surface:#161D23; --surface-2:#1D262E;
+    --ink:#E6EDF3; --muted:#8FA3B0; --line:#2A353E;
+    --accent:#4FC3BC; --accent-soft:#4FC3BC1F;
+    --signal:#E0965C; --signal-soft:#E0965C1F;
+    --good:#5FBF92; --warn:#D69A5C; --bad:#D97078;
+  }
+  :root[data-theme="light"]{
+    --ground:#F7F8FA; --surface:#FFFFFF; --surface-2:#EDF1F4;
+    --ink:#10171D; --muted:#5A6B78; --line:#D3DBE1;
+    --accent:#0B7A75; --accent-soft:#0B7A751A;
+    --signal:#B4622A; --signal-soft:#B4622A1A;
+    --good:#2E7D5B; --warn:#A8632A; --bad:#A63D40;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; padding:0 1.25rem 5rem;
+    background:var(--ground); color:var(--ink);
+    font-family:var(--sans); line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1080px; margin:0 auto}
+  h1,h2,h3{text-wrap:balance; line-height:1.2; margin:0}
+  h1{font-size:clamp(1.6rem,3.4vw,2.3rem); font-weight:680; letter-spacing:-.02em}
+  h2{font-size:1.05rem; font-weight:660; letter-spacing:-.01em}
+  h3{font-size:.9rem; font-weight:640}
+  p{margin:0; max-width:68ch}
+  code,.m{font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  .eyebrow{
+    font-family:var(--mono); font-size:.7rem; letter-spacing:.13em;
+    text-transform:uppercase; color:var(--muted);
+  }
+
+  header{padding:3.5rem 0 2rem; border-bottom:1px solid var(--line); display:grid; gap:.85rem}
+  header p{color:var(--muted)}
+
+  /* headline metrics */
+  .metrics{
+    display:grid; gap:1px; background:var(--line);
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    border:1px solid var(--line); margin:2rem 0 0;
+  }
+  .metric{background:var(--surface); padding:1rem 1.1rem; display:grid; gap:.2rem}
+  .metric .k{font-family:var(--mono); font-size:.68rem; letter-spacing:.1em;
+             text-transform:uppercase; color:var(--muted)}
+  .metric .v{font-family:var(--mono); font-size:1.5rem; font-weight:600;
+             font-variant-numeric:tabular-nums; letter-spacing:-.02em}
+  .metric .n{font-size:.76rem; color:var(--muted)}
+  .metric.hero .v{color:var(--accent)}
+
+  section{padding:2.75rem 0 0; display:grid; gap:1.1rem}
+
+  /* ---- diagram ---- */
+  .flow{display:grid; gap:0; margin-top:.5rem}
+  .stage{display:grid; gap:.65rem; justify-items:center}
+  .stage-label{
+    font-family:var(--mono); font-size:.66rem; letter-spacing:.14em;
+    text-transform:uppercase; color:var(--muted); justify-self:start;
+  }
+  .node{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--radius); padding:.85rem 1.15rem; width:100%;
+    display:grid; gap:.28rem; justify-items:center; text-align:center;
+  }
+  .node .t{font-weight:640; font-size:.94rem}
+  .node .s{font-family:var(--mono); font-size:.76rem; color:var(--muted)}
+  .node.io{border-color:var(--ink); border-width:1.5px}
+  .node.router{border-color:var(--accent); border-width:1.5px; background:var(--accent-soft)}
+  .node.feat{border-left:3px solid var(--signal)}
+
+  .connector{
+    height:26px; width:1px; background:var(--line); justify-self:center;
+    position:relative;
+  }
+  .connector::after{
+    content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:5px solid var(--line);
+  }
+  .split{
+    height:26px; position:relative; margin-top:26px;
+    border-top:1px solid var(--line);
+  }
+  .split span{
+    position:absolute; top:0; width:1px; height:26px; background:var(--line);
+  }
+  .split span::after{
+    content:""; position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    border-left:4px solid transparent; border-right:4px solid transparent;
+    border-top:5px solid var(--line);
+  }
+  .split span:nth-child(1){left:16.66%}
+  .split span:nth-child(2){left:50%}
+  .split span:nth-child(3){left:83.33%}
+  .split::before{
+    content:""; position:absolute; top:-26px; left:50%; width:1px; height:26px;
+    background:var(--line);
+  }
+
+  .two{display:grid; grid-template-columns:1fr 1fr; gap:.9rem; width:100%}
+  .three{display:grid; grid-template-columns:repeat(3,1fr); gap:.9rem; width:100%}
+
+  .branch{
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:var(--radius); padding:.9rem; display:grid; gap:.45rem;
+  }
+  .branch .corpus{font-family:var(--mono); font-size:.8rem; font-weight:620}
+  .branch .task{font-size:.82rem; color:var(--muted); line-height:1.45}
+  .pill{
+    justify-self:start; font-family:var(--mono); font-size:.66rem;
+    letter-spacing:.06em; text-transform:uppercase; padding:.16rem .48rem;
+    border-radius:2px; border:1px solid currentColor;
+  }
+  .pill.fires{color:var(--good)}
+  .pill.guard{color:var(--warn)}
+  .branch.fires{border-left:3px solid var(--good)}
+  .branch.guard{border-left:3px solid var(--warn)}
+
+  /* ---- tables ---- */
+  .scroll{overflow-x:auto; border:1px solid var(--line)}
+  table{border-collapse:collapse; width:100%; font-size:.85rem; background:var(--surface)}
+  th,td{padding:.55rem .8rem; text-align:right; border-bottom:1px solid var(--line);
+        font-family:var(--mono); font-variant-numeric:tabular-nums; white-space:nowrap}
+  th:first-child,td:first-child{text-align:left; font-family:var(--sans)}
+  thead th{
+    font-family:var(--mono); font-size:.68rem; letter-spacing:.08em;
+    text-transform:uppercase; color:var(--muted); font-weight:500;
+    background:var(--surface-2);
+  }
+  tbody tr:last-child td{border-bottom:0}
+  .pos{color:var(--good)} .neg{color:var(--bad)} .zero{color:var(--muted)}
+  .row-hi td{background:var(--accent-soft); font-weight:600}
+
+  /* ---- note ---- */
+  .note{
+    border:1px solid var(--line); border-left:3px solid var(--signal);
+    background:var(--surface); border-radius:var(--radius);
+    padding:1.1rem 1.25rem; display:grid; gap:.6rem;
+  }
+  .note h3{color:var(--signal)}
+  .note p{font-size:.9rem}
+
+  ul{margin:0; padding-left:1.1rem; display:grid; gap:.45rem; max-width:68ch}
+  li{font-size:.9rem}
+  li strong{font-weight:640}
+
+  footer{
+    margin-top:3.5rem; padding-top:1.25rem; border-top:1px solid var(--line);
+    color:var(--muted); font-size:.78rem; font-family:var(--mono);
+  }
+  a{color:var(--accent)}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  @media (max-width:680px){
+    .three,.two{grid-template-columns:1fr}
+    .split{display:none}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">datasets/all3 · 15,728 segments · 108 subjects</div>
+  <h1>Hierarchical two-stage classifier</h1>
+  <p>The only architecture of 36 tested that beats the corpus-ID baseline on three-class
+     mental-state classification. Route by recording corpus first, then solve three independent
+     binary problems — with a guard that refuses a specialist unless it beats guessing.</p>
+</header>
+
+<div class="metrics">
+  <div class="metric hero">
+    <div class="k">3-class accuracy</div><div class="v">0.6820</div>
+    <div class="n">5-fold subject-grouped CV</div>
+  </div>
+  <div class="metric">
+    <div class="k">vs baseline</div><div class="v pos">+0.0553</div>
+    <div class="n">corpus-ID shortcut = 0.6267</div>
+  </div>
+  <div class="metric">
+    <div class="k">macro F1</div><div class="v">0.6675</div>
+    <div class="n">balanced acc 0.6779</div>
+  </div>
+  <div class="metric">
+    <div class="k">router</div><div class="v">0.9703</div>
+    <div class="n">corpus predicted from EEG</div>
+  </div>
+  <div class="metric">
+    <div class="k">upper bound</div><div class="v">0.6963</div>
+    <div class="n">oracle router — not a result</div>
+  </div>
+</div>
+
+<section>
+  <div class="eyebrow">Architecture</div>
+  <h2>Signal path</h2>
+
+  <div class="flow">
+    <div class="stage"><div class="stage-label">Input</div>
+      <div class="node io">
+        <div class="t">Raw EEG window</div>
+        <div class="s">6 frontal channels × 512 samples · 4 s @ 128 Hz</div>
+        <div class="s">Fp1 Fp2 F7 F3 F4 F8</div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <div class="stage"><div class="stage-label">Feature extraction — two separate views</div>
+      <div class="two">
+        <div class="node feat">
+          <div class="t">v2 · 273 features</div>
+          <div class="s">50 Hz notch + 0.5–45 Hz zero-phase</div>
+          <div class="s">band power, DE, Hjorth, 1/f slope,</div>
+          <div class="s">perm. entropy, coherence, PLV</div>
+          <div class="s" style="color:var(--accent)">→ router only</div>
+        </div>
+        <div class="node feat">
+          <div class="t">v1 · 81 features</div>
+          <div class="s">30 rel. band power + 30 differential entropy</div>
+          <div class="s">+ 3 frontal alpha asymmetry</div>
+          <div class="s">+ 6 spectral entropy + 6 STD + 6 RMS</div>
+          <div class="s" style="color:var(--accent)">→ specialists only</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <div class="stage"><div class="stage-label">Stage 1 — router</div>
+      <div class="node router">
+        <div class="t">SVM (RBF) → which corpus recorded this?</div>
+        <div class="s">MODMA · SAM40 · CogLoad — 97.03% accurate</div>
+      </div>
+    </div>
+
+    <div class="split"><span></span><span></span><span></span></div>
+
+    <div class="stage"><div class="stage-label">Stage 2 — per-corpus binary specialist, guarded</div>
+      <div class="three">
+        <div class="branch fires">
+          <div class="corpus">MODMA · 50.6%</div>
+          <div class="task">healthy vs depression<br>resting-state, 53 subjects</div>
+          <span class="pill fires">specialist 5/5 folds</span>
+          <div class="task"><span class="m">0.6755</span> vs majority
+            <span class="m">0.5478</span> · <span class="m pos">+0.128</span></div>
+        </div>
+        <div class="branch guard">
+          <div class="corpus">SAM40 · 15.3%</div>
+          <div class="task">healthy vs stress<br>arithmetic / Stroop / mirror</div>
+          <span class="pill guard">guard → majority</span>
+          <div class="task"><span class="m">0.7500</span> vs majority
+            <span class="m">0.7500</span> · <span class="m zero">+0.000</span></div>
+        </div>
+        <div class="branch guard">
+          <div class="corpus">CogLoad · 34.1%</div>
+          <div class="task">healthy vs stress<br>cognitive load task</div>
+          <span class="pill guard">guard → majority</span>
+          <div class="task"><span class="m">0.6614</span> vs majority
+            <span class="m">0.6886</span> · <span class="m neg">−0.027</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="connector"></div>
+
+    <div class="stage"><div class="stage-label">Output</div>
+      <div class="node io">
+        <div class="t">healthy · stress · depression</div>
+        <div class="s">per-window label, aggregated over the recording</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="eyebrow">The mechanism</div>
+  <h2>Why routing beats a single model</h2>
+  <p>A flat classifier learns one decision boundary for all three corpora at once. CogLoad is a
+     third of the data and every flat model scores <em>below</em> its majority class there —
+     cancelling the genuine gain MODMA provides. Splitting the problem lets each corpus keep what
+     it can actually learn.</p>
+
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Model</th><th>3-class</th><th>vs 0.6267</th></tr></thead>
+      <tbody>
+        <tr><td>Best flat model — SVM on 81 features</td><td>0.6256</td><td class="neg">−0.0011</td></tr>
+        <tr><td>Hierarchical, v1 features throughout</td><td>0.6486</td><td class="pos">+0.0219</td></tr>
+        <tr class="row-hi"><td>Hierarchical, v2 router + v1 specialists</td><td>0.6820</td><td class="pos">+0.0553</td></tr>
+        <tr><td>Hierarchical, oracle router <em>(upper bound)</em></td><td>0.6963</td><td class="pos">+0.0696</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ul>
+    <li><strong>Router and specialists want opposite feature sets.</strong> v2's 273 features route
+        at 0.9703 against v1's 0.9161 — more features make the corpus easier to identify. But those
+        same 273 collapse the MODMA specialist to 0.5280, below its own majority: 273 dimensions
+        against 53 subjects overfits. Splitting the two views was worth <span class="m">+0.033</span>,
+        the single largest gain.</li>
+    <li><strong>The guard makes 0.6267 a floor.</strong> A specialist is used only if it beats its
+        corpus majority in inner cross-validation on the <em>training</em> folds. Deciding that on
+        the test fold would be selection on the test set.</li>
+    <li><strong>Only MODMA's specialist fires.</strong> SAM40 and CogLoad never beat guessing, so the
+        guard falls back to their majority class. The entire gain comes from depression detection.</li>
+    <li><strong>Tuning did nothing</strong> (<span class="m">+0.0002</span> from a nested C/γ grid),
+        and letting the model pick its own feature view <em>cost</em> <span class="m">−0.025</span> —
+        inner CV over ~40 subjects cannot reliably choose, so selection thrashes per fold.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="eyebrow">Out-of-fold confusion matrix</div>
+  <h2>Where it fails</h2>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>True ↓ / Predicted →</th><th>healthy</th><th>stress</th><th>depression</th><th>recall</th></tr></thead>
+      <tbody>
+        <tr><td>healthy</td><td>3491</td><td>2243</td><td>898</td><td>0.526</td></tr>
+        <tr><td>stress</td><td>219</td><td>5245</td><td>33</td><td>0.954</td></tr>
+        <tr><td>depression</td><td>1589</td><td>19</td><td>1991</td><td>0.553</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Stress is nearly always caught (recall 0.954) because two of three corpora default to it.
+     The real weakness is <strong>healthy</strong> — 2,243 healthy windows are called stress, almost
+     all of them SAM40 and CogLoad baseline recordings absorbed by those majority fallbacks.</p>
+</section>
+
+<section>
+  <div class="note">
+    <h3>Read this before quoting 0.6820</h3>
+    <p><strong>Stage 1 consumes corpus identity.</strong> So does the 0.6267 baseline it is measured
+       against — but state it explicitly rather than letting a reader assume otherwise.</p>
+    <p><strong>Report the corpus-free row, never the oracle row.</strong> The 0.6963 variant reads the
+       true corpus label at inference and exists only to bound how much accuracy the router's 3%
+       error costs.</p>
+    <p><strong>This is not a deployment estimate.</strong> Every result here is subject-disjoint but
+       never device-disjoint. Corpus identity is ~97% recoverable from the features, and two
+       independent measurements — removing the device signature (0.3255) and applying a specialist
+       to an unseen corpus (0.3995) — put accuracy on new hardware near chance.</p>
+    <p><strong>The ceiling is structural.</strong> No corpus contains more than two of the three
+       classes: every depression segment is MODMA and every stress segment is not. Stress versus
+       depression is therefore a device distinction, not a neural one, and no architecture fixes that
+       from this data.</p>
+  </div>
+</section>
+
+<footer>
+  scripts/all3_hierarchical.py --router v2 --specialists v1 &nbsp;·&nbsp;
+  Results/all3/hierarchical_v2_v1.json &nbsp;·&nbsp; 5-fold GroupKFold on subjects, seed 42
+</footer>
+</div>

@@ -1,0 +1,29 @@
+{
+  "rows": [
+    {
+      "name": "CogLoad stress (recording-level, LOSO)",
+      "n": 99,
+      "auc": 0.7924369747899159,
+      "bal_acc": 0.6915966386554622,
+      "prevalence": 0.8585858585858586,
+      "ci95": [
+        0.6764005122906711,
+        0.8962651928414201
+      ],
+      "level": "recording",
+      "fixed_epochs": 12,
+      "within_subject_auc": {
+        "mean": 0.9,
+        "std": 0.230251760071173,
+        "n_subjects": 14,
+        "ci95": [
+          0.7642857142857142,
+          1.0
+        ],
+        "frac_above_half": 0.9285714285714286
+      },
+      "segment_auc": 0.7415113830915105
+    }
+  ],
+  "elapsed_sec": 1509.6
+}

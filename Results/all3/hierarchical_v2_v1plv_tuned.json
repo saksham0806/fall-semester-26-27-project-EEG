@@ -1,0 +1,374 @@
+{
+  "shortcut_baseline": 0.6267166836215666,
+  "Hierarchical corpus-free / router=v2 spec=v1+plv+tuned": {
+    "accuracy": 0.657235503560529,
+    "balanced_accuracy": 0.6456087320801539,
+    "macro_f1": 0.6332383537870044,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": 0.030518819938962327,
+    "per_class": {
+      "healthy": {
+        "precision": 0.6267969037965352,
+        "recall": 0.512816646562123,
+        "f1": 0.5641068170509206,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.6986812308512056,
+        "recall": 0.9541568128069856,
+        "f1": 0.8066748692709935,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.6050089445438283,
+        "recall": 0.46985273687135315,
+        "f1": 0.5289333750390992,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3401,
+        2243,
+        988
+      ],
+      [
+        136,
+        5245,
+        116
+      ],
+      [
+        1889,
+        19,
+        1691
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.626963186329941,
+        "majority_within": 0.547807513506722,
+        "margin": 0.079155672823219,
+        "macro_f1": 0.4102576805695531
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.6606444403054572,
+        "majority_within": 0.6885826038368411,
+        "margin": -0.027938163531383897,
+        "macro_f1": 0.2995867685703396
+      }
+    },
+    "elapsed_sec": 73.1,
+    "router": "corpus-free",
+    "router_view": "v2",
+    "specialist_views": [
+      "v1",
+      "plv"
+    ],
+    "tuned": true,
+    "chosen_per_fold": {
+      "MODMA": [
+        {
+          "view": "v1",
+          "params": {
+            "C": 10.0,
+            "gamma": "scale"
+          },
+          "inner_acc": 0.5971627629122009,
+          "majority_acc": 0.5355706773894215
+        },
+        {
+          "view": "plv",
+          "params": {
+            "C": 1.0,
+            "gamma": 0.01
+          },
+          "inner_acc": 0.6419893284571252,
+          "majority_acc": 0.5732868020304569
+        },
+        {
+          "view": "v1",
+          "params": {
+            "C": 1.0,
+            "gamma": "scale"
+          },
+          "inner_acc": 0.6836215281469519,
+          "majority_acc": 0.5825723572202446
+        },
+        {
+          "view": "plv",
+          "params": {
+            "C": 1.0,
+            "gamma": 0.01
+          },
+          "inner_acc": 0.5777891778383316,
+          "majority_acc": 0.5235602094240838
+        },
+        {
+          "view": "v1",
+          "params": {
+            "C": 1.0,
+            "gamma": 0.01
+          },
+          "inner_acc": 0.5610358823394181,
+          "majority_acc": 0.523484608060933
+        }
+      ],
+      "SAM40": [
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        }
+      ],
+      "CogLoad": [
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.6985207795257102,
+          "majority_acc": 0.6985207795257102
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.7085170573218844,
+          "majority_acc": 0.7085170573218844
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.6728467495892982,
+          "majority_acc": 0.6728467495892982
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.678001387925052,
+          "majority_acc": 0.678001387925052
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.6850138760407031,
+          "majority_acc": 0.6850138760407031
+        }
+      ]
+    },
+    "router_accuracy": 0.9702823198245145
+  },
+  "Hierarchical oracle / router=v2 spec=v1+plv+tuned": {
+    "accuracy": 0.670587487283825,
+    "balanced_accuracy": 0.6591176730836973,
+    "macro_f1": 0.6438335174824735,
+    "shortcut_baseline": 0.6267166836215666,
+    "margin": 0.04387080366225837,
+    "per_class": {
+      "healthy": {
+        "precision": 0.6381641592077699,
+        "recall": 0.5052774427020507,
+        "f1": 0.5639989901540016,
+        "support": 6632
+      },
+      "stress": {
+        "precision": 0.7075556699703952,
+        "recall": 1.0,
+        "f1": 0.8287351123172019,
+        "support": 5497
+      },
+      "depression": {
+        "precision": 0.6274002954209749,
+        "recall": 0.4720755765490414,
+        "f1": 0.5387664499762169,
+        "support": 3599
+      }
+    },
+    "confusion_matrix": [
+      [
+        3351,
+        2272,
+        1009
+      ],
+      [
+        0,
+        5497,
+        0
+      ],
+      [
+        1900,
+        0,
+        1699
+      ]
+    ],
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.6345018218369142,
+        "majority_within": 0.547807513506722,
+        "margin": 0.0866943083301922,
+        "macro_f1": 0.618046215311696
+      },
+      "SAM40": {
+        "accuracy": 0.75,
+        "majority_within": 0.75,
+        "margin": 0.0,
+        "macro_f1": 0.42857142857142855
+      },
+      "CogLoad": {
+        "accuracy": 0.6885826038368411,
+        "majority_within": 0.6885826038368411,
+        "margin": 0.0,
+        "macro_f1": 0.40778733730421357
+      }
+    },
+    "elapsed_sec": 70.0,
+    "router": "oracle",
+    "router_view": "v2",
+    "specialist_views": [
+      "v1",
+      "plv"
+    ],
+    "tuned": true,
+    "chosen_per_fold": {
+      "MODMA": [
+        {
+          "view": "v1",
+          "params": {
+            "C": 10.0,
+            "gamma": "scale"
+          },
+          "inner_acc": 0.5971627629122009,
+          "majority_acc": 0.5355706773894215
+        },
+        {
+          "view": "plv",
+          "params": {
+            "C": 1.0,
+            "gamma": 0.01
+          },
+          "inner_acc": 0.6419893284571252,
+          "majority_acc": 0.5732868020304569
+        },
+        {
+          "view": "v1",
+          "params": {
+            "C": 1.0,
+            "gamma": "scale"
+          },
+          "inner_acc": 0.6836215281469519,
+          "majority_acc": 0.5825723572202446
+        },
+        {
+          "view": "plv",
+          "params": {
+            "C": 1.0,
+            "gamma": 0.01
+          },
+          "inner_acc": 0.5777891778383316,
+          "majority_acc": 0.5235602094240838
+        },
+        {
+          "view": "v1",
+          "params": {
+            "C": 1.0,
+            "gamma": 0.01
+          },
+          "inner_acc": 0.5610358823394181,
+          "majority_acc": 0.523484608060933
+        }
+      ],
+      "SAM40": [
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.75,
+          "majority_acc": 0.75
+        }
+      ],
+      "CogLoad": [
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.6985207795257102,
+          "majority_acc": 0.6985207795257102
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.7085170573218844,
+          "majority_acc": 0.7085170573218844
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.6728467495892982,
+          "majority_acc": 0.6728467495892982
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.678001387925052,
+          "majority_acc": 0.678001387925052
+        },
+        {
+          "view": null,
+          "params": null,
+          "inner_acc": 0.6850138760407031,
+          "majority_acc": 0.6850138760407031
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,195 @@
+{
+  "plan": "02",
+  "task": "4class",
+  "n_dev": 421,
+  "arms": {
+    "no IQ": {
+      "demographics": {
+        "model": "demographics only [no IQ]",
+        "n": 421,
+        "balanced_accuracy": 0.3993079656586612,
+        "macro_f1": 0.33861263153942006,
+        "accuracy": 0.34441805225653205,
+        "macro_auc": 0.6571593287757742,
+        "recall_per_class": {
+          "healthy": 0.5135135135135135,
+          "depression": 0.0880503144654088,
+          "anxiety": 0.5348837209302325,
+          "stress": 0.46078431372549017
+        },
+        "confusion": [
+          [
+            38,
+            4,
+            23,
+            9
+          ],
+          [
+            32,
+            14,
+            64,
+            49
+          ],
+          [
+            21,
+            5,
+            46,
+            14
+          ],
+          [
+            25,
+            8,
+            22,
+            47
+          ]
+        ]
+      },
+      "demographics_plus_residual_eeg": {
+        "model": "demographics + residualized EEG [no IQ]",
+        "n": 421,
+        "balanced_accuracy": 0.43052569449918643,
+        "macro_f1": 0.4179378107302255,
+        "accuracy": 0.4085510688836104,
+        "macro_auc": 0.6813620732960182,
+        "recall_per_class": {
+          "healthy": 0.6486486486486487,
+          "depression": 0.34591194968553457,
+          "anxiety": 0.32558139534883723,
+          "stress": 0.4019607843137255
+        },
+        "confusion": [
+          [
+            48,
+            11,
+            6,
+            9
+          ],
+          [
+            24,
+            55,
+            44,
+            36
+          ],
+          [
+            7,
+            37,
+            28,
+            14
+          ],
+          [
+            12,
+            33,
+            16,
+            41
+          ]
+        ]
+      },
+      "delta_auc": {
+        "delta_auc": 0.024202744520243957,
+        "ci95": [
+          -0.014444272588941284,
+          0.060387592352362754
+        ],
+        "n_boot": 2000,
+        "excludes_zero": false
+      },
+      "normative_r2_heldout_healthy": -0.28121880455125886,
+      "healthy_controls_per_fold": 59,
+      "elapsed_sec": 16.9
+    },
+    "with IQ": {
+      "demographics": {
+        "model": "demographics only [with IQ]",
+        "n": 421,
+        "balanced_accuracy": 0.4938427993850909,
+        "macro_f1": 0.4189292860967951,
+        "accuracy": 0.42280285035629456,
+        "macro_auc": 0.7052477381290292,
+        "recall_per_class": {
+          "healthy": 0.7432432432432432,
+          "depression": 0.11949685534591195,
+          "anxiety": 0.5930232558139535,
+          "stress": 0.5196078431372549
+        },
+        "confusion": [
+          [
+            55,
+            4,
+            7,
+            8
+          ],
+          [
+            36,
+            19,
+            58,
+            46
+          ],
+          [
+            13,
+            6,
+            51,
+            16
+          ],
+          [
+            19,
+            5,
+            25,
+            53
+          ]
+        ]
+      },
+      "demographics_plus_residual_eeg": {
+        "model": "demographics + residualized EEG [with IQ]",
+        "n": 421,
+        "balanced_accuracy": 0.45166711894249767,
+        "macro_f1": 0.44480656086659986,
+        "accuracy": 0.4323040380047506,
+        "macro_auc": 0.6958391576983695,
+        "recall_per_class": {
+          "healthy": 0.6891891891891891,
+          "depression": 0.389937106918239,
+          "anxiety": 0.32558139534883723,
+          "stress": 0.4019607843137255
+        },
+        "confusion": [
+          [
+            51,
+            13,
+            3,
+            7
+          ],
+          [
+            21,
+            62,
+            44,
+            32
+          ],
+          [
+            4,
+            39,
+            28,
+            15
+          ],
+          [
+            7,
+            34,
+            20,
+            41
+          ]
+        ]
+      },
+      "delta_auc": {
+        "delta_auc": -0.00940858043065973,
+        "ci95": [
+          -0.04546638618378937,
+          0.026224219269084564
+        ],
+        "n_boot": 2000,
+        "excludes_zero": false
+      },
+      "normative_r2_heldout_healthy": -0.28956752493218574,
+      "healthy_controls_per_fold": 59,
+      "elapsed_sec": 17.5
+    }
+  }
+}

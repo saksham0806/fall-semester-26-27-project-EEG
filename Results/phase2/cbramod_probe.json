@@ -1,0 +1,18 @@
+{
+  "pretrained": {
+    "auc_within": [
+      0.5715555555555556,
+      0.03158671952704347
+    ],
+    "dims": 4800,
+    "weights_loaded": true
+  },
+  "random init (control)": {
+    "auc_within": [
+      0.4957407407407407,
+      0.020877032358784648
+    ],
+    "dims": 4800,
+    "weights_loaded": false
+  }
+}

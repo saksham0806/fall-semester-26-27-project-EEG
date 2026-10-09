@@ -2,7 +2,9 @@ numpy
 pandas
 scipy
 matplotlib
-scikit-learn
+seaborn
+scikit-learn==1.9.0   # pinned: GroupKFold tie-breaking changed across versions (see arch_metd/train/folds.py)
+joblib
 jupyter
 notebook
 ipykernel
@@ -11,3 +13,18 @@ h5py
 tqdm
 openpyxl
 xlrd
+
+# Deep learning (run_models.py and src/proposed_model/ hard-import these)
+tensorflow
+xgboost
+
+# Phase 2: Riemannian geometry (scripts/phase2_riemannian.py)
+pyriemann
+
+# Phase 2: foundation-model probe (scripts/phase2_cbramod_probe.py).
+# Install torch AND torchaudio from the CPU index — braindecode hard-imports
+# torchaudio, and a mismatched build fails at import:
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cpu
+torch
+torchaudio
+braindecode

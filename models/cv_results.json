@@ -1,0 +1,75 @@
+{
+  "corpus_id_baseline": 0.6267166836215666,
+  "n_segments": 15728,
+  "n_subjects": 108,
+  "A_binary_pair": {
+    "accuracy": 0.3995422177009156,
+    "balanced_accuracy": 0.4104908835579209,
+    "macro_f1": 0.3903631253571323,
+    "confusion_matrix": [
+      [
+        1145,
+        4868,
+        619
+      ],
+      [
+        1520,
+        3847,
+        130
+      ],
+      [
+        285,
+        2022,
+        1292
+      ]
+    ],
+    "elapsed_sec": 17.8
+  },
+  "B_flat_3class": {
+    "accuracy": 0.6256358087487284,
+    "balanced_accuracy": 0.62419177192105,
+    "macro_f1": 0.629330717380239,
+    "confusion_matrix": [
+      [
+        4123,
+        1484,
+        1025
+      ],
+      [
+        1804,
+        3519,
+        174
+      ],
+      [
+        1337,
+        64,
+        2198
+      ]
+    ],
+    "elapsed_sec": 34.0
+  },
+  "C_hierarchical": {
+    "accuracy": 0.6078967446592065,
+    "balanced_accuracy": 0.5991635911784917,
+    "macro_f1": 0.6113319628767813,
+    "confusion_matrix": [
+      [
+        4282,
+        1491,
+        859
+      ],
+      [
+        2134,
+        3283,
+        80
+      ],
+      [
+        1568,
+        35,
+        1996
+      ]
+    ],
+    "router_accuracy": 0.914801176375151,
+    "elapsed_sec": 7.9
+  }
+}

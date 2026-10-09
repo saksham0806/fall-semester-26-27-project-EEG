@@ -1,8 +1,15 @@
 # Byte-compiled / optimized / DLL files
+
+scratch/
+scratch/*
+
+*/_cache/
 __pycache__/
 *.py[codz]
 *$py.class
 CLAUDE.md
+graphify-out/
+graphify-out/*
 # C extensions
 *.so
 # Distribution / packaging
@@ -155,6 +162,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.venv-metd-win/
 
 # Spyder project settings
 .spyderproject

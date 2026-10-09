@@ -1,0 +1,93 @@
+{
+  "task": "healthy_vs_schizophrenia",
+  "n": 212,
+  "n_dev": 169,
+  "n_test": 43,
+  "dev_majority": 0.5502958579881657,
+  "results": [
+    {
+      "model": "demographics [GB, nested-tuned]",
+      "accuracy": 0.8657754010695188,
+      "std": 0.05169319974553205,
+      "vs_majority": 0.31547954308135306
+    },
+    {
+      "model": "demographics [GB, default]",
+      "accuracy": 0.869934640522876,
+      "std": 0.051184276112306276,
+      "vs_majority": 0.31963878253471023
+    },
+    {
+      "model": "  age alone",
+      "accuracy": 0.7754604872251931,
+      "std": 0.05966064417738088,
+      "vs_majority": 0.2251646292370274
+    },
+    {
+      "model": "  IQ alone",
+      "accuracy": 0.7378490790255495,
+      "std": 0.07296765310511899,
+      "vs_majority": 0.1875532210373838
+    },
+    {
+      "model": "  education alone",
+      "accuracy": 0.7277480689245394,
+      "std": 0.053148997288651335,
+      "vs_majority": 0.17745221093637364
+    },
+    {
+      "model": "  sex alone",
+      "accuracy": 0.5502673796791443,
+      "std": 0.011642535324640244,
+      "vs_majority": -2.8478309021418013e-05
+    },
+    {
+      "model": "  all except age",
+      "accuracy": 0.784848484848485,
+      "std": 0.0706834494714235,
+      "vs_majority": 0.2345526268603193
+    },
+    {
+      "model": "  all except IQ",
+      "accuracy": 0.8011289364230542,
+      "std": 0.06871872892576214,
+      "vs_majority": 0.25083307843488845
+    },
+    {
+      "model": "  all except education",
+      "accuracy": 0.8642899584076056,
+      "std": 0.06316507433218305,
+      "vs_majority": 0.31399410041943987
+    },
+    {
+      "model": "  all except sex",
+      "accuracy": 0.8739156268568034,
+      "std": 0.04472089378049878,
+      "vs_majority": 0.32361976886863764
+    },
+    {
+      "model": "  EEG top-5 + demographics",
+      "accuracy": 0.8305407011289365,
+      "std": 0.038809633693895035,
+      "vs_majority": 0.2802448431407708
+    },
+    {
+      "model": "  EEG top-20 + demographics",
+      "accuracy": 0.8305407011289362,
+      "std": 0.05389307169836949,
+      "vs_majority": 0.28024484314077047
+    },
+    {
+      "model": "  EEG top-40 + demographics",
+      "accuracy": 0.8325014854426619,
+      "std": 0.04608049045079996,
+      "vs_majority": 0.2822056274544962
+    },
+    {
+      "model": "  EEG only, top-20",
+      "accuracy": 0.6827094474153296,
+      "std": 0.061057873400732904,
+      "vs_majority": 0.13241358942716386
+    }
+  ]
+}

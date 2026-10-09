@@ -1,0 +1,132 @@
+{
+  "screen_healthy_vs_ill": {
+    "description": "healthy vs ill \u2014 any recording",
+    "accuracy": 0.5996948118006104,
+    "majority_baseline": 0.5783316378433367,
+    "margin": 0.021363173957273607,
+    "balanced_accuracy": 0.5616435013521499,
+    "auc": 0.652656743827799,
+    "threshold_mean": 0.04431609257247594,
+    "threshold_per_fold": [
+      0.0093,
+      0.0066,
+      0.191,
+      0.0067,
+      0.0079
+    ],
+    "confusion_matrix": [
+      [
+        2114,
+        4518
+      ],
+      [
+        1778,
+        7318
+      ]
+    ],
+    "usable_folds": 5,
+    "n_segments": 15728,
+    "n_subjects": 108,
+    "sensitivity": 0.8045294635004397,
+    "specificity": 0.3187575392038601,
+    "within_corpus": {
+      "MODMA": {
+        "accuracy": 0.5964317125266994,
+        "majority": 0.547807513506722,
+        "margin": 0.04862419901997739,
+        "auc": 0.676704092115292
+      },
+      "SAM40": {
+        "accuracy": 0.7508333333333334,
+        "majority": 0.75,
+        "margin": 0.0008333333333333526,
+        "auc": 0.684362037037037
+      },
+      "CogLoad": {
+        "accuracy": 0.536971503073198,
+        "majority": 0.6885826038368411,
+        "margin": -0.15161110076364315,
+        "auc": 0.5478792451658075
+      }
+    },
+    "elapsed_sec": 100.4
+  },
+  "resting_healthy_vs_depressed": {
+    "description": "healthy vs depressed \u2014 resting-state protocol (MODMA)",
+    "accuracy": 0.6542279180801608,
+    "majority_baseline": 0.547807513506722,
+    "margin": 0.10642040457343882,
+    "balanced_accuracy": 0.6359550053404233,
+    "auc": 0.7535661664427682,
+    "threshold_mean": 0.6849245927421809,
+    "threshold_per_fold": [
+      0.5713,
+      0.4589,
+      0.8001,
+      0.965,
+      0.6293
+    ],
+    "confusion_matrix": [
+      [
+        3606,
+        754
+      ],
+      [
+        1998,
+        1601
+      ]
+    ],
+    "usable_folds": 5,
+    "n_segments": 7959,
+    "n_subjects": 53,
+    "sensitivity": 0.4448457904973604,
+    "specificity": 0.8270642201834862,
+    "elapsed_sec": 10.1
+  },
+  "task_healthy_vs_stressed": {
+    "description": "healthy vs stressed \u2014 cognitive-load protocol (SAM40 + CogLoad)",
+    "accuracy": 0.6590294761230532,
+    "majority_baseline": 0.7075556699703952,
+    "margin": -0.048526193847342025,
+    "balanced_accuracy": 0.48533354941363666,
+    "auc": 0.5982249120519002,
+    "threshold_mean": 0.1536211748577791,
+    "threshold_per_fold": [
+      0.2161,
+      0.1638,
+      0.0508,
+      0.1785,
+      0.1589
+    ],
+    "confusion_matrix": [
+      [
+        152,
+        2120
+      ],
+      [
+        529,
+        4968
+      ]
+    ],
+    "usable_folds": 5,
+    "n_segments": 7769,
+    "n_subjects": 55,
+    "sensitivity": 0.9037656903765691,
+    "specificity": 0.06690140845070422,
+    "within_corpus": {
+      "SAM40": {
+        "accuracy": 0.7520833333333333,
+        "majority": 0.75,
+        "margin": 0.002083333333333326,
+        "auc": 0.6785111111111111
+      },
+      "CogLoad": {
+        "accuracy": 0.6174334140435835,
+        "majority": 0.6885826038368411,
+        "margin": -0.07114918979325757,
+        "auc": 0.5574534764382864
+      }
+    },
+    "elapsed_sec": 30.8
+  }
+}
