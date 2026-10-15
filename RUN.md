@@ -1,5 +1,28 @@
 # RUN.md
 
+## Explainable AI — saved screening models
+
+```bash
+.venv/bin/python explainable_ai/test_explain.py
+.venv/bin/python -u explainable_ai/explain.py
+```
+
+Writes channel/family/band permutation plots, local feature effects, EEG traces and a
+report to `explainable_ai/results/`, using the existing fitted models without training.
+These are descriptive explanations on sampled training data. See
+[`explainable_ai/RUN.md`](explainable_ai/RUN.md) for inputs, outputs and limitations.
+
+## Paper diagrams
+
+```bash
+.venv/bin/python diagrams/test_generate_figures.py
+.venv/bin/python diagrams/generate_figures.py
+```
+
+Writes five publication figures to `diagrams/` as editable SVG and 300-DPI PNG files.
+The generator reads the committed result JSON files; the transfer panel uses the two-draw
+summary in `arch_metd/PROGRESS.md` and retains the Mumtaz montage-confound warning.
+
 ## Deployment — classify a recording as healthy / stressed / depressed
 
 ```bash
