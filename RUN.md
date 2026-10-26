@@ -1,5 +1,12 @@
 # RUN.md
 
+## Paper update handoff
+
+`toadd/README_FIRST.md` explains how to give the XAI material to ChatGPT.
+`toadd/chatgpt_xai_bundle.zip` contains the code, results, manuscript copies and
+suggested paper additions. `/toadd/` is ignored by Git. See `toadd/RUN.md` to refresh
+the snapshot; using the bundle requires no model execution.
+
 ## Explainable AI — saved screening models
 
 ```bash
